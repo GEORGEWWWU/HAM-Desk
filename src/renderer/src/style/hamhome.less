@@ -1,0 +1,570 @@
+@import url('./theme.less');
+@import '../style/mixins.less';
+
+// 用户
+.user {
+  width: 98%;
+  height: 128px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: var(--user-bg-color);
+  border-radius: 8px;
+  padding-bottom: 20px;
+
+  // 用户信息
+  .userInfo {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap: 20px;
+
+    .userAvatar {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      margin-left: 20px;
+      object-fit: cover;
+      border: solid 2px var(--bg-color-aside-button);
+    }
+
+    .user_info {
+      display: grid;
+      justify-items: left;
+      align-items: center;
+      gap: 6px;
+
+      h1 {
+        font-size: 32px;
+        font-weight: bold;
+        color: var(--text-color);
+      }
+
+      .usertags {
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: center;
+        gap: 8px;
+
+        span {
+          font-size: 12px;
+          color: var(--primary-color);
+          padding: 3px 7px;
+          background: var(--bg-color-aside-button);
+          border-radius: 4px;
+          transform: translate(-2px);
+        }
+      }
+    }
+  }
+
+  // 用户操作
+  .user_edit {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 5px;
+
+    button {
+      border-radius: 50%;
+      background: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease-in-out;
+      padding: 6px;
+      margin-right: 8px;
+
+      img {
+        width: 20px;
+        height: 20px;
+      }
+
+      .editIcon {
+        transform: translateY(-1px);
+      }
+    }
+
+    button:hover {
+      background: var(--after-bg-color-aside-button);
+    }
+  }
+}
+
+
+// 系统信息/公告横幅
+.popup {
+  width: 92%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  margin-right: 20px;
+  border-radius: 5px;
+  background: var(--bg-color-aside-button);
+
+  .popup_content {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 8px;
+
+    img {
+      width: 16px;
+      height: 16px;
+      opacity: 0.5;
+    }
+
+    h1 {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--notice-text-color);
+    }
+  }
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+    opacity: 0.8;
+
+    img {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+
+// HAM应用集合与数据展示
+.hamapps {
+  width: 93.5%;
+  display: grid;
+  justify-items: center;
+  align-content: flex-start;
+  gap: 15px;
+  padding-top: 8px;
+  margin-right: 25px;
+
+  .appsrow {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: flex-start;
+
+    //数据与日志
+    .data_log {
+      width: 24%;
+      height: 120px;
+      display: grid;
+      justify-items: center;
+      align-content: space-between;
+      gap: 13px;
+
+      .dataCount {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 8px;
+        background: var(--bg-color-aside-button);
+        border-radius: 8px;
+        opacity: 0.7;
+        transition: all 0.3s ease-in-out;
+
+        &:hover {
+          opacity: 1;
+          transform: scale(1.02);
+        }
+
+        h1 {
+          font-size: 40px;
+          color: var(--text-color);
+          margin-left: 5px;
+        }
+
+        .dataCount_text {
+          min-width: 50px;
+          display: grid;
+          justify-items: left;
+          align-items: center;
+          gap: 4px;
+          transform: translate(-5px);
+
+          p {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+          }
+
+          span {
+            font-size: 12px;
+            color: var(--primary-color);
+          }
+        }
+      }
+
+      .logAdd {
+        width: 100%;
+        display: flex;
+        justify-content: censter;
+        align-items: center;
+        gap: 4px;
+        padding: 10px 8px;
+        background: var(--bg-color-aside-button);
+        border-radius: 8px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.3s ease-in-out;
+
+        &:hover {
+          opacity: 1;
+          transform: scale(1.02);
+        }
+
+        button {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+
+          img {
+            width: 20px;
+            height: 20px;
+            margin-left: 8px;
+          }
+
+          p {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+
+    // 设备管理
+    .device_manage {
+      width: 24%;
+      height: 120px;
+      display: grid;
+      justify-items: center;
+      align-items: center;
+      background: var(--bg-color-aside-button);
+      border-radius: 8px;
+      transition: all 0.3s ease-in-out;
+      padding: 5px 8px;
+
+      .device_manage_app {
+        width: 100%;
+        height: 120px;
+        display: grid;
+        justify-items: center;
+        align-content: space-between;
+
+        img {
+          width: 92px;
+          margin-top: 13px;
+        }
+
+        button {
+          width: 100%;
+          padding: 6.5px 0;
+          font-size: 13px;
+          font-weight: bold;
+          color: var(--primary-color);
+          cursor: pointer;
+          transition: all 0.3s ease-in-out;
+          opacity: 0.7;
+          border-radius: 4px;
+          background: var(--system-item-button-bg-color);
+
+          &:hover {
+            opacity: 1;
+            transform: scale(1.02);
+          }
+        }
+      }
+    }
+
+    // HAM地图
+    .maps {
+      width: 45%;
+      height: 120px;
+      border-radius: 8px;
+      background: var(--bg-color-aside-button);
+      display: grid;
+      justify-items: center;
+      align-items: center;
+
+      .maps_app {
+        width: 100%;
+        height: 120px;
+        display: grid;
+        justify-items: left;
+        align-items: flex-end;
+        border-radius: 8px;
+        padding: 5px;
+        background-image: url('../assets/mapback.png');
+        background-size: cover;
+        cursor: pointer;
+
+        p {
+          font-size: 12px;
+          font-weight: bold;
+          color: var(--map-text-color);
+          z-index: 12;
+          padding: 5px 8px;
+          display: flex;
+          flex-direction: row;
+          justify-content: left;
+          align-items: center;
+          gap: 8px;
+
+          span {
+            font-size: 12px;
+            color: var(--map-titletext-color);
+            background: var(--map-text-bg-color);
+            padding: 3px 8px;
+            border-radius: 3px;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+// 设备管理
+.fullscrenn_manage_popup{
+  position: fixed;
+  z-index: 900;
+  width: calc(100vw - 90px) !important;
+  height: 91vh;
+  background: var(--device-manage-bg-color) !important;
+  transform: translateX(-50% + 3px);
+  backdrop-filter: blur(16px);
+  left: 50%;
+  top: 13px;
+  border-radius: 8px;
+  padding: 13px;
+  animation: showDevicePopup 0.3s ease-in-out;
+  display: grid !important;
+  justify-items: center !important;
+}
+@keyframes showDevicePopup {
+  from {
+    transform: translateX(-50% + 3px) translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50% + 3px) translateY(0);
+    opacity: 1;
+  }
+}
+
+
+// 用户信息编辑窗口
+.userinfo_edit {
+  width: 320px;
+  height: 90vh;
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%) translateX(0);
+  background: var(--device-manage-bg-color);
+  backdrop-filter: blur(16px);
+  border-radius: 8px;
+  padding: 13px;
+  z-index: 900;
+  border: solid 1px var(--system-item-border-color);
+  display: grid;
+  justify-items: center;
+  align-content: flex-start;
+  gap: 22px;
+  animation: showEditWindow 0.3s ease-in-out;
+
+  @keyframes showEditWindow {
+    from {
+      transform: translateY(-50%) opacity(0);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(-50%) opacity(1);
+      opacity: 1;
+    }
+  }
+
+  .welcome_tip{
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    gap: 3px;
+    position: absolute;
+    margin-top: 13px;
+
+    p {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-color);
+      background: var(--bg-color);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+  }
+
+  // 用户头像
+  .user_avatar_box {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    padding: 18px;
+
+    .user_avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: solid 2px var(--bg-color-aside-button);
+      transform: translateY(24px);
+      cursor: pointer;
+      object-fit: cover;
+      z-index: 2;
+    }
+  }
+
+  // 用户名输入框
+  .username_input {
+    display: grid;
+    justify-items: center;
+
+    input {
+      width: 128px;
+      height: 32px;
+      outline: none;
+      background: var(--bg-color);
+      border: none;
+      text-align: center;
+      border-radius: 4px;
+      font-size: 18px;
+      color: var(--text-color);
+    }
+  }
+
+  // 操作证类型选择器
+  .radio-inputs {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 0.5rem;
+    background-color: var(--bg-color-aside-button);
+    box-sizing: border-box;
+    padding: 0.25rem;
+    width: 250px;
+    font-size: 14px;
+    border: solid 1px var(--bg-color);
+    box-shadow: 0 0 10px var(--bg-color);
+
+    .radio {
+      flex: 1 1 auto;
+      text-align: center;
+
+      .name {
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.3rem;
+        border: none;
+        padding: .35rem 0;
+        color: var(--text-color);
+        transition: all .15s ease-in-out;
+      }
+
+      input {
+        display: none;
+      }
+
+      input:checked+.name {
+        background-color: var(--bg-color);
+        font-weight: 600;
+      }
+    }
+  }
+
+  // 设备数量和火腿年龄
+  .device_hamage {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 20px;
+
+    .user_device,
+    .user_hamage {
+      display: flex;
+      flex-direction: row;
+      justify-content: left;
+      align-items: center;
+      gap: 6px;
+
+      input {
+        width: 40px;
+        height: 32px;
+        outline: none;
+        background: var(--bg-color);
+        border: none;
+        text-align: center;
+        border-radius: 4px;
+        font-size: 18px;
+        color: var(--text-color);
+      }
+    }
+  }
+
+  // 保存按钮
+  .save_button {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    bottom: 20px;
+    z-index: 4;
+
+    button {
+      width: 118px;
+      height: 32px;
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+      color: var(--text-color);
+      background: var(--bg-color);
+      cursor: pointer;
+      transition: all 0.12s ease-in-out;
+
+      &:active {
+        transform: scale(0.96);
+      }
+    }
+
+    .save_btn {
+      background: var(--checkversion-bg-color);
+      color: var(--checkversion-text-color);
+    }
+  }
+}

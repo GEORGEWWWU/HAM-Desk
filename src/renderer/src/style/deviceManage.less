@@ -1,0 +1,223 @@
+@import url('./theme.less');
+@import '../style/mixins.less';
+
+.component_ctl {
+  width: 88vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5px;
+
+  .ctl_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 8px;
+
+    h1 {
+      font-size: 13px;
+      color: var(--primary-color);
+      padding: 4px 10px;
+      // background: var(--system-item-button-bg-color);
+      border-radius: 4px;
+    }
+  }
+
+  .ctl_btn {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 13px;
+
+    button {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-color);
+      background: var(--system-item-button-bg-color);
+      border-radius: 4px;
+      padding: 4px 10px;
+    }
+
+    .add_btn {
+      background: var(--checkversion-bg-color);
+      color: var(--checkversion-text-color);
+    }
+  }
+}
+
+.device_list {
+  width: 88vw;
+  max-height: 83vh;
+  margin-top: 13px;
+  display: grid;
+  justify-items: center;
+  align-content: flex-start;
+  overflow-y: scroll;
+  gap: 8px;
+
+  .deviceItem {
+    width: 97.5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px;
+    background: var(--system-item-button-bg-color);
+    padding: 8px 10px;
+
+    .deviceInfo {
+      width: 82%;
+      display: flex;
+      flex-direction: row;
+      justify-content: left;
+      align-items: center;
+      gap: 8px;
+
+      .deviceName {
+        width: 80%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        border-radius: 3px;
+
+        p {
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-weight: bold;
+          font-size: 12px;
+          color: var(--primary-color);
+          padding: 4px 10px;
+        }
+
+        input {
+          width: 100%;
+          border: none;
+          outline: none;
+          background: var(--device-manage-bg-color);
+          font-weight: bold;
+          font-size: 12px;
+          color: var(--primary-color);
+          padding: 8px 10px;
+          border-radius: 3px;
+          cursor: text;
+          user-select: text;
+          -webkit-user-select: text;
+          pointer-events: auto;
+          
+          &:focus {
+            background: var(--device-manage-focus-bg-color, var(--device-manage-bg-color));
+            box-shadow: 0 0 0 1px var(--primary-color);
+          }
+        }
+      }
+
+      .deviceType {
+        p {
+          font-size: 12px;
+          color: var(--primary-color);
+          padding: 4px 10px;
+          background: var(--device-manage-bg-color);
+          border-radius: 4px;
+        }
+
+        select {
+          width: 90px;
+          border: none;
+          outline: none;
+          background: var(--device-manage-bg-color);
+          font-weight: bold;
+          font-size: 12px;
+          color: var(--primary-color);
+          padding: 7px 10px;
+          border-radius: 3px;
+        }
+      }
+    }
+
+    .deviceCtrl {
+      width: 18%;
+      display: flex;
+      flex-direction: row;
+      justify-content: right;
+      align-items: center;
+      gap: 18px;
+
+      button {
+        padding: 5px;
+        display: grid;
+        justify-items: center;
+        align-items: center;
+        transition: background 0.12s ease-in-out;
+        border-radius: 4px;
+
+        &:hover {
+          background: var(--device-manage-bg-color);
+        }
+
+        img {
+          width: 16px;
+          height: 16px;
+          opacity: 0.8;
+          transform: translateY(1px);
+        }
+      }
+
+      .device_delete {
+        &:hover {
+          background: #e407071c;
+        }
+      }
+
+      .cancel_btn {
+        &:hover {
+          background: var(--device-manage-bg-color);
+        }
+
+        padding: 5px 10px;
+
+        p {
+          font-size: 13px;
+          color: var(--primary-color);
+        }
+
+        background: var(--device-manage-bg-color);
+      }
+
+      .confirm_btn {
+        &:hover {
+          background: var(--checkversion-bg-color);
+        }
+
+        padding: 5px 10px;
+
+        p {
+          font-size: 13px;
+          color: var(--checkversion-text-color);
+        }
+
+        background: var(--checkversion-bg-color);
+      }
+    }
+  }
+
+  .add_device_item {
+    animation: addDeviceItem 0.2s ease-in-out;
+  }
+
+  @keyframes addDeviceItem {
+    0% {
+      transform: translateY(2px) scale(0.995);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+}

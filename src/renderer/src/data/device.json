@@ -1,0 +1,19 @@
+{
+  "deviceList": [
+    {
+      "id": 1762348383252,
+      "deviceName": "泉盛 UVK6",
+      "deviceType": "手持台"
+    },
+    {
+      "id": 1762348396508,
+      "deviceName": "宝峰 UV5RX",
+      "deviceType": "手持台"
+    },
+    {
+      "id": 1762348410629,
+      "deviceName": "宝峰 UV5R-Mini",
+      "deviceType": "手持台"
+    }
+  ]
+}

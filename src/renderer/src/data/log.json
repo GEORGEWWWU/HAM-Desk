@@ -1,0 +1,25 @@
+{
+  "logs": [
+    {
+      "id": "20251112_1",
+      "datetime": "2025-11-12 14:30:00",
+      "call": "对方呼号",
+      "freq": "通联频率",
+      "mode": "发射模式",
+      "rstS": "发送信号报告",
+      "rstR": "接收信号报告",
+      "power": "功率",
+      "device": "使用设备",
+      "qth": "对方位置",
+      "atn": "天线信息",
+      "message": "备注信息",
+      "qsl": "QSL状态",
+      "weather": "天气信息",
+      "antenna": "天线类型"
+    }
+  ],
+  "statistics": {
+    "totalContacts": 0,
+    "lastContact": "2025-11-12 14:30:00"
+  }
+}
