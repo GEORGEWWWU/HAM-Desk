@@ -23,6 +23,8 @@
   --Maps-poor-bg-color: #ffededd8;
   --Maps-good-text-color: #0fcf0f;
   --Maps-good-bg-color: #e8fdf5d8;
+  --Maps-fair-text-color: #e5af0e;
+  --Maps-fair-bg-color: #fff3cd;
   --Maps-link-color: #56a8ffba;
 }
 [data-theme='dark'] {
@@ -49,5 +51,7 @@
   --Maps-poor-bg-color: #413838d8;
   --Maps-good-text-color: #51cf66;
   --Maps-good-bg-color: #383f3cd8;
+  --Maps-fair-text-color: #e1ad0f;
+  --Maps-fair-bg-color: #413838d8;
   --Maps-link-color: #006de1bd;
 }

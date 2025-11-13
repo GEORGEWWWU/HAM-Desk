@@ -30,28 +30,28 @@
               <h1>{{ bandTitle('80m-40m') }}</h1>
               <p>白天</p>
               <span
-                :class="{ 'Maps-poor-text-color': d1 === 'Poor', 'Maps-good-text-color': d1 === 'Good', 'Maps-loading-text': !d1 }">{{
+                :class="{ 'Maps-poor-text-color': d1 === 'Poor','Maps-fair-text-color': d1 === 'Fair', 'Maps-good-text-color': d1 === 'Good', 'Maps-loading-text': !d1 }">{{
                   displayD1 || '加载中...' }}</span>
             </div>
             <div class="hfdata" @mouseenter="hoverKey = '30m-20m'" @mouseleave="hoverKey = ''">
               <h1>{{ bandTitle('30m-20m') }}</h1>
               <p>白天</p>
               <span
-                :class="{ 'Maps-poor-text-color': d2 === 'Poor', 'Maps-good-text-color': d2 === 'Good', 'Maps-loading-text': !d2 }">{{
+                :class="{ 'Maps-poor-text-color': d2 === 'Poor', 'Maps-fair-text-color': d2 === 'Fair', 'Maps-good-text-color': d2 === 'Good', 'Maps-loading-text': !d2 }">{{
                   displayD2 || '加载中...' }}</span>
             </div>
             <div class="hfdata" @mouseenter="hoverKey = '17m-15m'" @mouseleave="hoverKey = ''">
               <h1>{{ bandTitle('17m-15m') }}</h1>
               <p>白天</p>
               <span
-                :class="{ 'Maps-poor-text-color': d3 === 'Poor', 'Maps-good-text-color': d3 === 'Good', 'Maps-loading-text': !d3 }">{{
+                :class="{ 'Maps-poor-text-color': d3 === 'Poor', 'Maps-fair-text-color': d3 === 'Fair', 'Maps-good-text-color': d3 === 'Good', 'Maps-loading-text': !d3 }">{{
                   displayD3 || '加载中...' }}</span>
             </div>
             <div class="hfdata" @mouseenter="hoverKey = '12m-10m'" @mouseleave="hoverKey = ''">
               <h1>{{ bandTitle('12m-10m') }}</h1>
               <p>白天</p>
               <span
-                :class="{ 'Maps-poor-text-color': d4 === 'Poor', 'Maps-good-text-color': d4 === 'Good', 'Maps-loading-text': !d4 }">{{
+                :class="{ 'Maps-poor-text-color': d4 === 'Poor', 'Maps-fair-text-color': d4 === 'Fair', 'Maps-good-text-color': d4 === 'Good', 'Maps-loading-text': !d4 }">{{
                   displayD4 || '加载中...' }}</span>
             </div>
           </div>
@@ -61,28 +61,28 @@
               <h1>{{ bandTitle('80m-40m') }}</h1>
               <p>夜晚</p>
               <span
-                :class="{ 'Maps-poor-text-color': n1 === 'Poor', 'Maps-good-text-color': n1 === 'Good', 'Maps-loading-text': !n1 }">{{
+                :class="{ 'Maps-poor-text-color': n1 === 'Poor', 'Maps-fair-text-color': n1 === 'Fair', 'Maps-good-text-color': n1 === 'Good', 'Maps-loading-text': !n1 }">{{
                   displayN1 || '加载中...' }}</span>
             </div>
             <div class="hfdata" @mouseenter="hoverKey = '30m-20m'" @mouseleave="hoverKey = ''">
               <h1>{{ bandTitle('30m-20m') }}</h1>
               <p>夜晚</p>
               <span
-                :class="{ 'Maps-poor-text-color': n2 === 'Poor', 'Maps-good-text-color': n2 === 'Good', 'Maps-loading-text': !n2 }">{{
+                :class="{ 'Maps-poor-text-color': n2 === 'Poor', 'Maps-fair-text-color': n2 === 'Fair', 'Maps-good-text-color': n2 === 'Good', 'Maps-loading-text': !n2 }">{{
                   displayN2 || '加载中...' }}</span>
             </div>
             <div class="hfdata" @mouseenter="hoverKey = '17m-15m'" @mouseleave="hoverKey = ''">
               <h1>{{ bandTitle('17m-15m') }}</h1>
               <p>夜晚</p>
               <span
-                :class="{ 'Maps-poor-text-color': n3 === 'Poor', 'Maps-good-text-color': n3 === 'Good', 'Maps-loading-text': !n3 }">{{
+                :class="{ 'Maps-poor-text-color': n3 === 'Poor', 'Maps-fair-text-color': n3 === 'Fair', 'Maps-good-text-color': n3 === 'Good', 'Maps-loading-text': !n3 }">{{
                   displayN3 || '加载中...' }}</span>
             </div>
             <div class="hfdata" @mouseenter="hoverKey = '12m-10m'" @mouseleave="hoverKey = ''">
               <h1>{{ bandTitle('12m-10m') }}</h1>
               <p>夜晚</p>
               <span
-                :class="{ 'Maps-poor-text-color': n4 === 'Poor', 'Maps-good-text-color': n4 === 'Good', 'Maps-loading-text': !n4 }">{{
+                :class="{ 'Maps-poor-text-color': n4 === 'Poor', 'Maps-fair-text-color': n4 === 'Fair', 'Maps-good-text-color': n4 === 'Good', 'Maps-loading-text': !n4 }">{{
                   displayN4 || '加载中...' }}</span>
             </div>
           </div>
@@ -271,6 +271,7 @@ const translateCondition = (condition: string): string => {
   const map: Record<string, string> = {
     'Poor': '较差',
     'Good': '良好',
+    'Fair': '一般',
     'day': '白天',
     'night': '夜晚'
   }

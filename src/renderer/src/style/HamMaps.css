@@ -179,6 +179,10 @@ header .header .header_right button:active {
   color: var(--Maps-good-text-color);
   background: var(--Maps-good-bg-color);
 }
+.Maps .Maps_container .hfmaps_data .hfdata_line .hfdata span.Maps-fair-text-color {
+  color: var(--Maps-fair-text-color);
+  background: var(--Maps-fair-bg-color);
+}
 .Maps .Maps_container .hfmaps_data .hfdata_line .hfdata span.Maps-loading-text {
   font-size: 13px !important;
   color: var(--color-primary);
