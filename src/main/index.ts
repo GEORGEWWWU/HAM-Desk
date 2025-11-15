@@ -51,12 +51,12 @@ function checkFirstRun() {
   const userDataPath = app.getPath('userData')
   const firstRunFlagPath = join(userDataPath, '.firstrun')
   const versionFlagPath = join(userDataPath, '.version')
-  
+
   try {
     // 获取当前应用版本
     const currentVersion = app.getVersion()
     console.log('当前应用版本:', currentVersion)
-    
+
     // 检查版本标记文件是否存在且版本一致
     let isVersionChanged = false
     try {
@@ -68,23 +68,23 @@ function checkFirstRun() {
       isVersionChanged = true
       console.log('版本文件不存在，标记为需要重置')
     }
-    
+
     // 检查首次运行标记文件是否存在
     const isFirstRun = !existsSync(firstRunFlagPath)
-    
+
     // 如果是首次运行或版本变化，则重置数据
     if (isFirstRun || isVersionChanged) {
       console.log('检测到首次安装或版本变化，正在重置应用数据...')
-      
+
       // 重置应用数据
       resetAppData()
-      
+
       // 创建首次运行标记文件
       writeFileSync(firstRunFlagPath, new Date().toISOString())
-      
+
       // 创建版本标记文件
       writeFileSync(versionFlagPath, currentVersion)
-      
+
       console.log('应用数据重置完成')
     }
   } catch (error) {
@@ -97,14 +97,14 @@ function resetAppData() {
   try {
     const userDataPath = app.getPath('userData')
     const dataDir = join(userDataPath, 'data')
-    
+
     // 要删除的数据文件列表
     const dataFiles = [
       join(userDataPath, 'callsign.json'),
       join(userDataPath, 'device.json'),
       join(userDataPath, 'log.json')
     ]
-    
+
     // 删除数据文件
     dataFiles.forEach(filePath => {
       try {
@@ -116,7 +116,7 @@ function resetAppData() {
         console.error(`删除文件失败 ${filePath}:`, error)
       }
     })
-    
+
     // 删除data目录及其内容
     try {
       if (existsSync(dataDir)) {
@@ -131,7 +131,7 @@ function resetAppData() {
     } catch (error) {
       console.error(`删除目录失败 ${dataDir}:`, error)
     }
-    
+
     // 重新创建默认数据文件
     ensureDataFile()
     ensureDeviceDataFile()
@@ -272,13 +272,13 @@ ipcMain.handle('avatar:update', async (_, tempPath: string) => {
   try {
     // 在生产环境中，将头像保存到用户数据目录，而不是应用安装目录
     const userDataDir = app.getPath('userData')
-    const assetsDir = isDev 
+    const assetsDir = isDev
       ? join(app.getAppPath(), 'src', 'renderer', 'src', 'assets')
       : userDataDir
-    
+
     // 确保目录存在
     ensureDirSync(assetsDir)
-    
+
     const target = join(assetsDir, 'userAvatar.png')
     copyFileSync(tempPath, target)
     return { success: true, path: target }
@@ -312,14 +312,14 @@ ipcMain.handle('user:read', () => {
     // 确保用户数据文件存在
     const userDir = dirname(USER_JSON)
     ensureDirSync(userDir)
-    
+
     try {
       readFileSync(USER_JSON, 'utf-8')
     } catch {
       // 文件不存在，创建默认文件
       writeFileSync(USER_JSON, JSON.stringify({ callsign: '', cert: 'A', devices: 0, hamAge: 0 }, null, 2))
     }
-    
+
     return JSON.parse(readFileSync(USER_JSON, 'utf-8'))
   } catch {
     return { callsign: '', cert: 'A', devices: 0, hamAge: 0 }
@@ -330,7 +330,7 @@ ipcMain.handle('user:write', (_, data) => {
     // 确保用户数据文件存在
     const userDir = dirname(USER_JSON)
     ensureDirSync(userDir)
-    
+
     const old = JSON.parse(readFileSync(USER_JSON, 'utf-8'))
     const merged = { ...old, ...data }          // 合并
     if (JSON.stringify(merged) !== JSON.stringify(old)) {
@@ -443,16 +443,55 @@ ipcMain.handle('log:read', () => {
   const dir = (global as any).logDir || DEFAULT_DIR
   const file = join(dir, 'log.json')
   try {
-    return JSON.parse(readFileSync(file, 'utf-8'))
-  } catch {
-    return [] // 首次为空数组
+    const data = JSON.parse(readFileSync(file, 'utf-8'))
+    // 确保返回的数据格式一致
+    if (data && typeof data === 'object' && 'logs' in data) {
+      return data
+    } else if (Array.isArray(data)) {
+      // 如果是数组格式，转换为对象格式
+      return { logs: data, statistics: { totalContacts: data.length, lastContact: new Date().toISOString() } }
+    } else {
+      // 默认返回空数据结构
+      return { logs: [], statistics: { totalContacts: 0, lastContact: new Date().toISOString() } }
+    }
+  } catch (error) {
+    console.error('[log:read] 读取日志文件失败:', error)
+    // 首次或错误时返回默认结构
+    return { logs: [], statistics: { totalContacts: 0, lastContact: new Date().toISOString() } }
   }
 })
-ipcMain.handle('log:write', (_, data: any[]) => {
+ipcMain.handle('log:write', (_, data: any) => {
   const dir = (global as any).logDir || DEFAULT_DIR
   ensureDirSync(dir)
   const file = join(dir, 'log.json')
-  writeFileSync(file, JSON.stringify(data, null, 2))
+  
+  try {
+    // 确保数据是正确的格式
+    let logData
+    if (data && typeof data === 'object' && 'logs' in data) {
+      // 已经是正确的LogData格式
+      logData = data
+    } else if (Array.isArray(data)) {
+      // 如果是数组，转换为LogData格式
+      logData = {
+        logs: data,
+        statistics: {
+          totalContacts: data.length,
+          lastContact: data.length > 0 ? data[data.length - 1].datetime || new Date().toISOString() : new Date().toISOString()
+        }
+      }
+    } else {
+      console.error('[log:write] 无效的数据格式:', data)
+      return { success: false, error: '无效的数据格式' }
+    }
+    
+    writeFileSync(file, JSON.stringify(logData, null, 2))
+    console.log('[log:write] 日志数据写入成功')
+    return { success: true }
+  } catch (error) {
+    console.error('[log:write] 写入日志文件失败:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
+  }
 })
 
 // 打开日志存储目录
@@ -520,7 +559,7 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
     // 确保目标目录存在
     const destDir = dirname(destPath)
     ensureDirSync(destDir)
-    
+
     // 开发环境
     if (isDev) {
       const srcPath = join(app.getAppPath(), 'src', 'renderer', 'src', 'assets', fileName)
@@ -528,14 +567,14 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
       copyFileSync(srcPath, destPath)
       return { success: true }
     }
-    
+
     // 生产环境 - 尝试多个可能的资源路径
     let srcPath: string | undefined
-    
+
     // 提取文件名和扩展名，用于匹配带哈希的文件
     const baseName = fileName.substring(0, fileName.lastIndexOf('.'))
     const extension = fileName.substring(fileName.lastIndexOf('.'))
-    
+
     const possiblePaths = [
       join(process.resourcesPath, 'assets', fileName),
       join(process.resourcesPath, 'app.asar.unpacked', 'renderer', 'assets', fileName),
@@ -543,12 +582,12 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
       join(app.getAppPath(), 'resources', 'assets', fileName),
       join(app.getAppPath(), 'out', 'renderer', 'assets', fileName)
     ]
-    
+
     // 打印所有可能的路径用于调试
     console.log('尝试以下路径查找文件:', fileName)
     console.log('process.resourcesPath:', process.resourcesPath)
     console.log('app.getAppPath():', app.getAppPath())
-    
+
     // 首先尝试直接匹配文件名
     for (const path of possiblePaths) {
       console.log(`检查路径: ${path}, 存在: ${existsSync(path)}`)
@@ -557,11 +596,11 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
         break
       }
     }
-    
+
     // 如果直接匹配失败，尝试匹配带哈希的文件
     if (!srcPath) {
       console.log('直接匹配失败，尝试匹配带哈希的文件...')
-      
+
       // 检查每个可能的目录
       const possibleDirs = [
         join(process.resourcesPath, 'assets'),
@@ -570,7 +609,7 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
         join(app.getAppPath(), 'resources', 'assets'),
         join(app.getAppPath(), 'out', 'renderer', 'assets')
       ]
-      
+
       for (const dir of possibleDirs) {
         if (existsSync(dir)) {
           try {
@@ -579,7 +618,7 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
             const matchedFile = files.find(file => {
               return file.includes(baseName) && file.endsWith(extension)
             })
-            
+
             if (matchedFile) {
               srcPath = join(dir, matchedFile)
               console.log(`找到匹配文件: ${srcPath}`)
@@ -591,11 +630,11 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
         }
       }
     }
-    
+
     if (!srcPath) {
       throw new Error(`找不到资源文件: ${fileName}，已尝试以下路径:\n${possiblePaths.join('\n')}`)
     }
-    
+
     console.log('生产环境复制文件:', srcPath, '->', destPath)
     copyFileSync(srcPath, destPath)
     return { success: true }
@@ -611,18 +650,18 @@ ipcMain.handle('get-asset-path', async (_, fileName: string) => {
   if (isDev) {
     return new URL(`../renderer/src/assets/${fileName}`, import.meta.url).href
   }
-  
+
   // 生产环境需要读取资源文件并返回base64编码的data URL
   try {
     // 首先尝试从resources目录读取
     const resourcePath = join(process.resourcesPath, 'assets', fileName)
     const fileBuffer = readFileSync(resourcePath)
     const base64Data = fileBuffer.toString('base64')
-    
+
     // 根据文件扩展名确定MIME类型
     const ext = extname(fileName).toLowerCase()
     let mimeType = 'image/png'
-    
+
     switch (ext) {
       case '.jpg':
       case '.jpeg':
@@ -638,7 +677,7 @@ ipcMain.handle('get-asset-path', async (_, fileName: string) => {
         mimeType = 'image/png'
         break
     }
-    
+
     return `data:${mimeType};base64,${base64Data}`
   } catch (error) {
     console.error('Failed to load asset:', fileName, error)
@@ -651,10 +690,10 @@ ipcMain.handle('get-user-avatar-path', async () => {
   try {
     // 在生产环境中，用户头像保存在用户数据目录
     const userDataDir = app.getPath('userData')
-    const avatarPath = isDev 
+    const avatarPath = isDev
       ? join(app.getAppPath(), 'src', 'renderer', 'src', 'assets', 'userAvatar.png')
       : join(userDataDir, 'userAvatar.png')
-    
+
     // 检查文件是否存在
     if (existsSync(avatarPath)) {
       // 读取文件并返回base64编码的data URL

@@ -1,0 +1,91 @@
+@import url('./theme.less');
+@import '../style/mixins.less';
+
+.logapp {
+  .bg-color();
+  .text-color();
+  display: grid;
+  justify-items: center !important;
+  align-content: flex-start;
+
+  .logbox {
+    width: 95%;
+    margin-top: 13px;
+    margin-right: 8px;
+    border: solid 1px var(--system-item-border-color);
+    background: var(--bg-color-aside-button);
+  }
+
+  // QSO列表
+  .qsoList {
+    width: 98%;
+    display: block;
+    overflow-x: auto;
+    box-sizing: border-box;
+
+    &::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--bg-color-aside-button);
+      border-radius: 4px;
+      margin: 0 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #cccccc7e;
+      border-radius: 4px;
+      border: 1px solid var(--bg-color-aside-button);
+      min-width: 20px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: #ccccccad;
+    }
+
+    table {
+      border-collapse: collapse;
+      border: solid 1px var(--system-item-border-color);
+      font-size: 12px;
+      user-select: none;
+
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+        border: solid 1px var(--system-item-border-color);
+        white-space: nowrap;
+      }
+
+      thead {
+        background-color: var(--bg-color-aside-button-hover);
+
+        th {
+          font-weight: bold;
+        }
+      }
+
+      tbody {
+        tr {
+          background-color: var(--bg-color-aside-button);
+
+          &:hover {
+            background-color: var(--bg-color-aside-button-hover);
+          }
+
+          td{
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+}
+
+button {
+  .bg-color();
+  .text-color();
+  background: none;
+}

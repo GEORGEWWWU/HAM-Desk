@@ -46,7 +46,6 @@ export function useDevice() {
       // 直接使用Electron API，不检查环境
       const data = await window.electronAPI.deviceRead()
       devices.value = data.deviceList || []
-      console.log('设备数据已加载:', devices.value)
     } catch (err) {
       console.error('加载设备数据失败:', err)
       error.value = err instanceof Error ? err.message : '加载设备数据失败'

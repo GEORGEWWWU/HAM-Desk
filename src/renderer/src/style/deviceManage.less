@@ -108,7 +108,7 @@
           user-select: text;
           -webkit-user-select: text;
           pointer-events: auto;
-          
+
           &:focus {
             background: var(--device-manage-focus-bg-color, var(--device-manage-bg-color));
             box-shadow: 0 0 0 1px var(--primary-color);
@@ -220,4 +220,8 @@
       opacity: 1;
     }
   }
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
