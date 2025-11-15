@@ -99,7 +99,7 @@ aside {
 
 
 // 主要内容区域
-main{
+main {
   width: 100vw;
   display: flex;
   flex-direction: row;
@@ -107,7 +107,7 @@ main{
   align-content: flex-start;
   gap: 8px;
 
-  .main_left_fixed{
+  .main_left_fixed {
     width: 55px;
     height: 100vh;
     background: var(--bg-color-aside);
@@ -116,7 +116,7 @@ main{
     z-index: 1;
   }
 
-  .main_content{
+  .main_content {
     width: calc(100vw - 55px);
     background: var(--bg-color);
     z-index: 1;
@@ -135,6 +135,17 @@ main{
   right: 0;
   z-index: 1000 !important;
 
+  &::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  // 为所有子元素隐藏滚动条
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
   .setting {
     width: 95%;
     margin-top: 13px;
@@ -143,7 +154,6 @@ main{
     align-content: flex-start;
     grid-template-columns: 1fr 3.4fr;
     gap: 20px;
-    // border: solid;
 
     .setting_button {
       width: 100%;
@@ -722,7 +732,7 @@ main{
             justify-content: space-between;
             align-items: center;
 
-            .relay_title{
+            .relay_title {
               display: flex;
               justify-content: left;
               align-items: center;
@@ -756,7 +766,7 @@ main{
               }
             }
 
-            .relayCount{
+            .relayCount {
               display: flex;
               justify-content: right;
               align-items: center;
@@ -769,7 +779,7 @@ main{
                 color: var(--primary-color);
               }
 
-              img{
+              img {
                 width: 17px;
                 transform: translateY(1px);
               }

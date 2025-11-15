@@ -40,16 +40,16 @@ export function useLog() {
     try {
       // 获取日志目录
       logDir.value = await window.electronAPI.logGetDir()
-      
+
       // 从log.json文件加载数据
       const logData = await window.electronAPI.logRead()
-      
+
       // 检查数据格式并提取logs数组
       if (logData && typeof logData === 'object') {
         // 如果数据是包含logs属性的对象
         if ('logs' in logData && Array.isArray(logData.logs)) {
           logs.value = logData.logs
-        } 
+        }
         // 如果数据本身就是数组
         else if (Array.isArray(logData)) {
           logs.value = logData
@@ -61,8 +61,6 @@ export function useLog() {
       } else {
         logs.value = []
       }
-      
-      console.log('日志数据加载完成:', logs.value)
     } catch (error) {
       console.error('加载日志数据失败:', error)
       logs.value = []

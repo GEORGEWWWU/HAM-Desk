@@ -401,15 +401,17 @@ button {
   background: none;
 }
 
-.main_content{
+.main_content {
   animation: showMainContent 0.3s ease-in-out;
 }
+
 @keyframes showMainContent {
-  from{
+  from {
     opacity: 0;
     transform: scale(0.995);
   }
-  to{
+
+  to {
     opacity: 1;
     transform: scale(1);
   }

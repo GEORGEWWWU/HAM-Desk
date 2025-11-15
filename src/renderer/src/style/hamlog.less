@@ -7,80 +7,316 @@
   display: grid;
   justify-items: center !important;
   align-content: flex-start;
+  animation: fadein 0.2s ease-in-out;
 
-  .logbox {
-    width: 95%;
-    margin-top: 13px;
-    margin-right: 8px;
-    border: solid 1px var(--system-item-border-color);
-    background: var(--bg-color-aside-button);
+  // 添加QSO容器
+  .addQSO {
+    width: 98%;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+
+    .addQSOcontainer {
+      width: 99.5%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-color-aside-button);
+      border: solid 1px var(--system-item-border-color);
+      padding: 8px 0;
+      border-radius: 6px;
+
+      .addQSO_input {
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: center;
+
+        .addbtn {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          border: solid 1px var(--system-item-border-color);
+          margin-left: 12px;
+          transition: all 0.12s ease-in-out;
+
+          input {
+            width: 100px;
+            height: 24px;
+            border: none;
+            outline: none;
+            padding: 4px 8px;
+            background: var(--bg-color-aside-button);
+            color: var(--primary-color);
+          }
+
+          button {
+            width: auto;
+            height: 32px;
+            border: none;
+            outline: none;
+            padding: 0 10px;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            background: var(--checkversion-bg-color);
+
+            p {
+              font-size: 13px;
+              color: var(--checkversion-text-color);
+              transform: translateY(-1px);
+            }
+          }
+        }
+
+        .addActive {
+          border: solid 1px var(--checkversion-bg-color);
+        }
+      }
+
+      .QSO_info {
+        display: flex;
+        flex-direction: row;
+        justify-content: right;
+        align-items: center;
+        gap: 13px;
+        margin-right: 12px;
+
+        p {
+          font-size: 13px;
+          color: var(--primary-color);
+
+          span {
+            font-size: 13px;
+            color: var(--primary-color);
+            opacity: 1;
+          }
+        }
+
+        span {
+          font-size: 13px;
+          color: var(--primary-color-light);
+          opacity: 0.5;
+        }
+      }
+    }
   }
 
-  // QSO列表
-  .qsoList {
+  // QSO列表容器
+  .QSO_Contianer {
     width: 98%;
     display: block;
     overflow-x: auto;
     box-sizing: border-box;
+    border: solid 1px var(--system-item-border-color);
+    background: var(--bg-color-aside-button);
+    margin-top: 13px;
 
-    &::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
-    }
+    // QSO列表
+    .qsoList {
+      width: 100%;
+      display: block;
+      overflow-x: auto;
+      box-sizing: border-box;
+      margin: 0 !important;
 
-    &::-webkit-scrollbar-track {
-      background: var(--bg-color-aside-button);
-      border-radius: 4px;
-      margin: 0 2px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #cccccc7e;
-      border-radius: 4px;
-      border: 1px solid var(--bg-color-aside-button);
-      min-width: 20px;
-    }
-
-    &::-webkit-scrollbar-thumb:hover {
-      background: #ccccccad;
-    }
-
-    table {
-      border-collapse: collapse;
-      border: solid 1px var(--system-item-border-color);
-      font-size: 12px;
-      user-select: none;
-
-      th,
-      td {
-        padding: 8px;
-        text-align: left;
-        border: solid 1px var(--system-item-border-color);
-        white-space: nowrap;
+      &::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
       }
 
-      thead {
-        background-color: var(--bg-color-aside-button-hover);
+      &::-webkit-scrollbar-track {
+        background: var(--bg-color-aside-button);
+        border-radius: 4px;
+        margin: 0 2px;
+      }
 
-        th {
-          font-weight: bold;
+      &::-webkit-scrollbar-thumb {
+        background: #cccccc7e;
+        border-radius: 4px;
+        border: 1px solid var(--bg-color-aside-button);
+        min-width: 20px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: #ccccccad;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: solid 1px var(--system-item-border-color);
+        font-size: 12px;
+        user-select: none;
+
+        th,
+        td {
+          padding: 8px;
+          text-align: left;
+          border: solid 1px var(--system-item-border-color);
+          white-space: nowrap;
+        }
+
+        thead {
+          background-color: var(--bg-color-aside-button-hover);
+
+          th {
+            font-weight: bold;
+
+            span {
+              font-size: 10px;
+              color: var(--text-color);
+              padding: 1px 6px;
+              border-radius: 4px;
+              opacity: 0.8;
+            }
+
+            .rxtext {
+              color: var(--Maps-good-text-color);
+              background: var(--Maps-good-bg-color);
+            }
+
+            .txtext {
+              color: var(--Maps-poor-text-color);
+              background: var(--Maps-poor-bg-color);
+            }
+          }
+        }
+
+        tbody {
+          tr {
+            background-color: var(--bg-color-aside-button);
+
+            &:hover {
+              background-color: var(--bg-color-aside-button-hover);
+            }
+
+            td {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+
+    // 操作和提示
+    .logOption {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0 8px 0;
+
+      .logop_left {
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: center;
+
+        p {
+          font-size: 14px;
+          color: var(--primary-color);
+          margin-left: 13px;
+          opacity: 0.8;
         }
       }
 
-      tbody {
-        tr {
-          background-color: var(--bg-color-aside-button);
+      .logop_right {
+        display: flex;
+        flex-direction: row;
+        justify-content: right;
+        align-items: center;
+
+        .pagebtn {
+          width: 24px;
+          height: 24px;
+          display: grid;
+          justify-items: center;
+          align-items: center;
+          border-radius: 4px;
+          background: var(--system-item-button-bg-color);
+          margin: 0 13px;
+          opacity: 0.7;
+          transition: all 0.12s ease-in-out;
+          cursor: pointer;
 
           &:hover {
-            background-color: var(--bg-color-aside-button-hover);
+            opacity: 1;
           }
 
-          td{
-            font-size: 14px;
+          &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+          }
+
+          img {
+            width: 13px;
+            height: 13px;
+          }
+        }
+
+        .pageIndex {
+          padding: 0 8px;
+          height: 24.1px;
+          font-size: 14px;
+          display: grid;
+          justify-items: center;
+          align-items: center;
+          border-radius: 4px;
+          background: var(--system-item-button-bg-color);
+          opacity: 0.8;
+          color: var(--text-color);
+        }
+
+        .optbtn {
+          width: auto;
+          height: 24px;
+          padding: 0 8px;
+          display: grid;
+          font-size: 14px;
+          justify-items: center;
+          align-items: center;
+          border-radius: 4px;
+          background: var(--system-item-button-bg-color);
+          margin-right: 13px;
+          color: var(--text-color);
+          opacity: 0.8;
+          transition: all 0.12s ease-in-out;
+
+          &:hover {
+            opacity: 1;
           }
         }
       }
     }
+  }
+
+  .editQSO{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    backdrop-filter: blur(4px);
+    background: var(--bg-color-aside-button);
+    z-index: 999;
+  }
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 

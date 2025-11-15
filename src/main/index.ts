@@ -143,10 +143,10 @@ function resetAppData() {
 // 创建主窗口
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    width: 820,
-    height: 590,
-    minWidth: 820,
-    minHeight: 590,
+    width: 900,
+    height: 640,
+    minWidth: 900,
+    minHeight: 640,
     maxWidth: 984,
     maxHeight: 708,
     show: false,
@@ -159,8 +159,8 @@ function createWindow(): void {
     }
   })
 
-  // 锁定窗口宽高比例（820:590 ≈ 1.39:1）
-  mainWindow.setAspectRatio(820 / 590)
+  // 锁定窗口宽高比例（900:640 ≈ 1.41:1）
+  mainWindow.setAspectRatio(900 / 640)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -464,7 +464,7 @@ ipcMain.handle('log:write', (_, data: any) => {
   const dir = (global as any).logDir || DEFAULT_DIR
   ensureDirSync(dir)
   const file = join(dir, 'log.json')
-  
+
   try {
     // 确保数据是正确的格式
     let logData
@@ -484,7 +484,7 @@ ipcMain.handle('log:write', (_, data: any) => {
       console.error('[log:write] 无效的数据格式:', data)
       return { success: false, error: '无效的数据格式' }
     }
-    
+
     writeFileSync(file, JSON.stringify(logData, null, 2))
     console.log('[log:write] 日志数据写入成功')
     return { success: true }
