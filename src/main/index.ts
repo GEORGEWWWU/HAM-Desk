@@ -4,9 +4,7 @@ import { app, shell, BrowserWindow, ipcMain, nativeTheme, dialog } from 'electro
 import { join, dirname, extname } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { promises as fs, existsSync, unlinkSync, readdirSync, rmdirSync } from 'fs'
-import { readFileSync, writeFileSync, copyFileSync } from 'fs'
-import { ensureDirSync } from 'fs-extra'
+import { promises as fs } from 'fs'
 import * as https from 'https'
 import { writeFile } from 'fs/promises'
 
@@ -21,33 +19,33 @@ const DEVICE_PATH = isDev
   : join(app.getPath('userData'), 'device.json')
 
 // 确保数据目录和文件存在
-function ensureDataFile() {
+async function ensureDataFileAsync() {
   const dataDir = dirname(DATA_PATH)
-  ensureDirSync(dataDir)
+  await ensureDirAsync(dataDir); // 使用异步目录创建
 
   try {
-    readFileSync(DATA_PATH, 'utf-8')
+    await fs.access(DATA_PATH) // 检查文件是否存在
   } catch {
     // 文件不存在，创建默认文件
-    writeFileSync(DATA_PATH, JSON.stringify({ callsign: '' }, null, 2))
+    await fs.writeFile(DATA_PATH, JSON.stringify({ callsign: '' }, null, 2))
   }
 }
 
 // 确保设备数据文件存在
-function ensureDeviceDataFile() {
-  const dataDir = dirname(DEVICE_PATH)
-  ensureDirSync(dataDir)
+async function ensureDeviceDataFileAsync() {
+  const deviceDir = dirname(DEVICE_PATH)
+  await ensureDirAsync(deviceDir); // 使用异步目录创建
 
   try {
-    readFileSync(DEVICE_PATH, 'utf-8')
+    await fs.access(DEVICE_PATH) // 检查文件是否存在
   } catch {
-    // 文件不存在，创建默认文件
-    writeFileSync(DEVICE_PATH, JSON.stringify({ deviceList: [] }, null, 2))
+    // 文件不存在，创建默认设备文件
+    await fs.writeFile(DEVICE_PATH, JSON.stringify({ deviceList: [] }, null, 2))
   }
 }
 
 // 检查是否是首次安装或重新安装，如果是则重置数据
-function checkFirstRun() {
+async function checkFirstRun() {
   const userDataPath = app.getPath('userData')
   const firstRunFlagPath = join(userDataPath, '.firstrun')
   const versionFlagPath = join(userDataPath, '.version')
@@ -60,7 +58,7 @@ function checkFirstRun() {
     // 检查版本标记文件是否存在且版本一致
     let isVersionChanged = false
     try {
-      const savedVersion = readFileSync(versionFlagPath, 'utf-8')
+      const savedVersion = await fs.readFile(versionFlagPath, 'utf-8')
       isVersionChanged = savedVersion !== currentVersion
       console.log('已保存版本:', savedVersion, '版本是否变化:', isVersionChanged)
     } catch {
@@ -70,20 +68,26 @@ function checkFirstRun() {
     }
 
     // 检查首次运行标记文件是否存在
-    const isFirstRun = !existsSync(firstRunFlagPath)
+    let isFirstRun = false
+    try {
+      await fs.access(firstRunFlagPath)
+      isFirstRun = false
+    } catch {
+      isFirstRun = true
+    }
 
     // 如果是首次运行或版本变化，则重置数据
     if (isFirstRun || isVersionChanged) {
       console.log('检测到首次安装或版本变化，正在重置应用数据...')
 
       // 重置应用数据
-      resetAppData()
+      await resetAppData()
 
       // 创建首次运行标记文件
-      writeFileSync(firstRunFlagPath, new Date().toISOString())
+      await fs.writeFile(firstRunFlagPath, new Date().toISOString())
 
       // 创建版本标记文件
-      writeFileSync(versionFlagPath, currentVersion)
+      await fs.writeFile(versionFlagPath, currentVersion)
 
       console.log('应用数据重置完成')
     }
@@ -93,7 +97,7 @@ function checkFirstRun() {
 }
 
 // 重置应用数据
-function resetAppData() {
+async function resetAppData() {
   try {
     const userDataPath = app.getPath('userData')
     const dataDir = join(userDataPath, 'data')
@@ -106,35 +110,47 @@ function resetAppData() {
     ]
 
     // 删除数据文件
-    dataFiles.forEach(filePath => {
+    for (const filePath of dataFiles) {
       try {
-        if (existsSync(filePath)) {
-          unlinkSync(filePath)
+        // 使用异步检查文件是否存在
+        try {
+          await fs.access(filePath)
+          // 如果文件存在，删除它
+          await fs.unlink(filePath)
           console.log(`已删除文件: ${filePath}`)
+        } catch {
+          // 文件不存在，跳过
         }
       } catch (error) {
         console.error(`删除文件失败 ${filePath}:`, error)
       }
-    })
+    }
 
     // 删除data目录及其内容
     try {
-      if (existsSync(dataDir)) {
-        const files = readdirSync(dataDir)
-        files.forEach(file => {
+      // 使用异步检查目录是否存在
+      try {
+        await fs.access(dataDir)
+        // 如果目录存在，读取其内容
+        const files = await fs.readdir(dataDir)
+        // 删除目录中的所有文件
+        for (const file of files) {
           const filePath = join(dataDir, file)
-          unlinkSync(filePath)
-        })
-        rmdirSync(dataDir)
+          await fs.unlink(filePath)
+        }
+        // 删除空目录
+        await fs.rmdir(dataDir)
         console.log(`已删除目录: ${dataDir}`)
+      } catch {
+        // 目录不存在，跳过
       }
     } catch (error) {
       console.error(`删除目录失败 ${dataDir}:`, error)
     }
 
     // 重新创建默认数据文件
-    ensureDataFile()
-    ensureDeviceDataFile()
+    await ensureDataFileAsync()
+    await ensureDeviceDataFileAsync()
   } catch (error) {
     console.error('重置应用数据时出错:', error)
   }
@@ -277,10 +293,11 @@ ipcMain.handle('avatar:update', async (_, tempPath: string) => {
       : userDataDir
 
     // 确保目录存在
-    ensureDirSync(assetsDir)
+    await ensureDirAsync(assetsDir) // 使用异步目录创建
 
     const target = join(assetsDir, 'userAvatar.png')
-    copyFileSync(tempPath, target)
+    // 使用异步复制替代同步复制
+    await fs.copyFile(tempPath, target)
     return { success: true, path: target }
   } catch (error) {
     console.error('[avatar:update]', error)
@@ -307,34 +324,43 @@ ipcMain.handle('avatar:saveBlob', async (_, blobUrl: string) => {
 const USER_JSON = isDev
   ? join(app.getAppPath(), 'src', 'renderer', 'src', 'data', 'callsign.json')
   : join(app.getPath('userData'), 'callsign.json')
-ipcMain.handle('user:read', () => {
+ipcMain.handle('user:read', async () => {
   try {
     // 确保用户数据文件存在
     const userDir = dirname(USER_JSON)
-    ensureDirSync(userDir)
+    await ensureDirAsync(userDir) // 使用异步目录创建
 
     try {
-      readFileSync(USER_JSON, 'utf-8')
+      await fs.access(USER_JSON) // 使用异步检查文件是否存在
     } catch {
       // 文件不存在，创建默认文件
-      writeFileSync(USER_JSON, JSON.stringify({ callsign: '', cert: 'A', devices: 0, hamAge: 0 }, null, 2))
+      await fs.writeFile(USER_JSON, JSON.stringify({ callsign: '', cert: 'A', devices: 0, hamAge: 0 }, null, 2))
     }
 
-    return JSON.parse(readFileSync(USER_JSON, 'utf-8'))
+    const data = await fs.readFile(USER_JSON, 'utf-8')
+    return JSON.parse(data)
   } catch {
     return { callsign: '', cert: 'A', devices: 0, hamAge: 0 }
   }
 })
-ipcMain.handle('user:write', (_, data) => {
+// 用户信息写入（合并字段）
+const userWriteHandler = async (_, data) => {
   try {
     // 确保用户数据文件存在
     const userDir = dirname(USER_JSON)
-    ensureDirSync(userDir)
+    await ensureDirAsync(userDir) // 使用异步目录创建
 
-    const old = JSON.parse(readFileSync(USER_JSON, 'utf-8'))
+    try {
+      await fs.access(USER_JSON) // 使用异步检查文件是否存在
+    } catch {
+      // 文件不存在，创建默认文件
+      await fs.writeFile(USER_JSON, JSON.stringify({ callsign: '', cert: 'A', devices: 0, hamAge: 0 }, null, 2))
+    }
+
+    const old = JSON.parse(await fs.readFile(USER_JSON, 'utf-8'))
     const merged = { ...old, ...data }          // 合并
     if (JSON.stringify(merged) !== JSON.stringify(old)) {
-      writeFileSync(USER_JSON, JSON.stringify(merged, null, 2))
+      await fs.writeFile(USER_JSON, JSON.stringify(merged, null, 2))
     }
     return merged
   } catch (e) {
@@ -342,13 +368,17 @@ ipcMain.handle('user:write', (_, data) => {
     // 如果出错，返回传入的数据作为默认值
     return data
   }
-})
+}
+
+// 使用焦点管理包装用户信息写入操作
+wrapIpcWithFocusManagement('user:write', userWriteHandler)
 
 // 调用签名数据读写
-ipcMain.handle('callsign:read', () => {
+ipcMain.handle('callsign:read', async () => {
   try {
-    ensureDataFile() // 确保文件存在
-    return JSON.parse(readFileSync(DATA_PATH, 'utf-8')).callsign ?? ''
+    await ensureDataFileAsync() // 使用异步版本确保文件存在
+    const data = await fs.readFile(DATA_PATH, 'utf-8')
+    return JSON.parse(data).callsign ?? ''
   } catch (e) {
     console.error('[callsign:read]', e)
     return ''
@@ -356,61 +386,142 @@ ipcMain.handle('callsign:read', () => {
 })
 
 // 调用签名数据写入
-ipcMain.handle('callsign:write', (_, val: string) => {
+const callsignWriteHandler = async (_, val: string) => {
   try {
-    ensureDataFile() // 确保文件存在
-    writeFileSync(DATA_PATH, JSON.stringify({ callsign: val }, null, 2))
+    await ensureDataFileAsync() // 使用异步版本确保文件存在
+    await fs.writeFile(DATA_PATH, JSON.stringify({ callsign: val }, null, 2))
   } catch (e) {
     console.error('[callsign:write]', e)
   }
-})
+}
+
+// 使用焦点管理包装呼号写入操作
+wrapIpcWithFocusManagement('callsign:write', callsignWriteHandler)
 
 // 设备数据读取
-ipcMain.handle('device:read', () => {
+ipcMain.handle('device:read', async () => {
   try {
-    ensureDeviceDataFile() // 确保文件存在
-    return JSON.parse(readFileSync(DEVICE_PATH, 'utf-8'))
+    await ensureDeviceDataFileAsync() // 使用异步版本确保文件存在
+    const data = await fs.readFile(DEVICE_PATH, 'utf-8')
+    const parsedData = JSON.parse(data)
+
+    // 兼容两种数据格式：直接数组格式和包含deviceList属性的对象格式
+    if (Array.isArray(parsedData)) {
+      // 如果是直接数组格式，直接返回
+      return parsedData
+    } else if (parsedData && parsedData.deviceList && Array.isArray(parsedData.deviceList)) {
+      // 如果是包含deviceList属性的对象格式，返回整个对象
+      return parsedData
+    } else {
+      // 其他情况，返回默认格式
+      console.warn('[device:read] 设备数据格式不正确，返回默认格式:', parsedData)
+      return { deviceList: [] }
+    }
   } catch (e) {
     console.error('[device:read]', e)
     return { deviceList: [] }
   }
 })
 
-// 修改设备数据写入 IPC 处理器
-ipcMain.handle('device:write', async (_, data: any) => {
-  const startTime = Date.now()
+// 设备数据写入
+const deviceWriteHandler = async (_, data: any) => {
+  const timeout = 10000 // 10秒超时
+
   try {
-    console.log('[device:write] 开始写入设备数据...')
-    await ensureDeviceDataFileAsync() // 改为异步
-    await fs.writeFile(DEVICE_PATH, JSON.stringify(data, null, 2)) // 异步写入
-    console.log(`[device:write] 文件写入完成，总耗时: ${Date.now() - startTime}ms`)
-    return { success: true }
+
+    // 使用Promise.race实现超时保护
+    const writePromise = async () => {
+      await ensureDeviceDataFileAsync()
+      await fs.writeFile(DEVICE_PATH, JSON.stringify(data, null, 2))
+      return { success: true }
+    }
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('写入操作超时')), timeout)
+    })
+
+    const result = await Promise.race([writePromise(), timeoutPromise])
+
+    return result
   } catch (e) {
-    console.error('[device:write]', e)
-    return { success: false, error: e }
-  }
-})
-
-// 新增异步版本的 ensure 函数
-async function ensureDeviceDataFileAsync() {
-  const dataDir = dirname(DEVICE_PATH)
-  ensureDirSync(dataDir) // 目录创建可以保持同步
-
-  try {
-    await fs.access(DEVICE_PATH) // 检查文件是否存在
-  } catch {
-    // 文件不存在，创建默认文件
-    await fs.writeFile(DEVICE_PATH, JSON.stringify({ deviceList: [] }, null, 2))
+    console.error('[device:write] 写入失败:', e)
+    console.error('[device:write] 错误详情:', e instanceof Error ? e.stack : String(e))
+    return { success: false, error: e instanceof Error ? e.message : String(e) }
   }
 }
+
+// 使用焦点管理包装设备数据写入操作
+wrapIpcWithFocusManagement('device:write', deviceWriteHandler)
+
+// 日志数据写入 - 添加超时保护和优化
+const logWriteHandler = async (_, data: any) => {
+  const timeout = 10000 // 10秒超时
+
+  try {
+
+    // 确保数据是正确的格式
+    let logData
+    if (data && typeof data === 'object' && 'logs' in data) {
+      // 已经是正确的LogData格式
+      logData = data
+    } else if (Array.isArray(data)) {
+      // 如果是数组，转换为LogData格式
+      logData = {
+        logs: data,
+        statistics: {
+          totalContacts: data.length,
+          lastContact: data.length > 0 ? data[data.length - 1].datetime || new Date().toISOString() : new Date().toISOString()
+        }
+      }
+    } else {
+      console.error('[log:write] 无效的数据格式:', data)
+      return { success: false, error: '无效的数据格式' }
+    }
+
+    // 使用Promise.race实现超时保护
+    const writePromise = async () => {
+      const dir = (global as any).logDir || DEFAULT_DIR
+      await ensureDirAsync(dir) // 使用异步目录创建
+      const file = join(dir, 'log.json')
+
+      await fs.writeFile(file, JSON.stringify(logData, null, 2))
+      return { success: true }
+    }
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('写入操作超时')), timeout)
+    })
+
+    const result = await Promise.race([writePromise(), timeoutPromise])
+
+    return result
+  } catch (error) {
+    console.error('[log:write] 写入失败:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
+  }
+}
+
+// 使用焦点管理包装日志数据写入操作
+wrapIpcWithFocusManagement('log:write', logWriteHandler)
 
 // 默认目录：开发：src/renderer/src/data，发行：<exe>/data
 const DEFAULT_DIR = isDev
   ? join(__dirname, '../../src/renderer/src/data')
   : join(app.getPath('userData'), 'data')
 
-// 确保目录存在
-ensureDirSync(DEFAULT_DIR)
+// 异步初始化默认目录
+async function initDefaultDir() {
+  await ensureDirAsync(DEFAULT_DIR)
+}
+
+// 异步版本的ensureDirSync
+async function ensureDirAsync(dir: string) {
+  try {
+    await fs.access(dir)
+  } catch {
+    await fs.mkdir(dir, { recursive: true })
+  }
+}
 
 // 读取日志目录（若用户改过则优先用存储的）
 ipcMain.handle('log:getDir', () => {
@@ -439,11 +550,11 @@ ipcMain.handle('log:selectDir', async () => {
 })
 
 // 读/写 log.json（文件名为 log.json）
-ipcMain.handle('log:read', () => {
+ipcMain.handle('log:read', async () => {
   const dir = (global as any).logDir || DEFAULT_DIR
   const file = join(dir, 'log.json')
   try {
-    const data = JSON.parse(readFileSync(file, 'utf-8'))
+    const data = JSON.parse(await fs.readFile(file, 'utf-8'))
     // 确保返回的数据格式一致
     if (data && typeof data === 'object' && 'logs' in data) {
       return data
@@ -460,53 +571,20 @@ ipcMain.handle('log:read', () => {
     return { logs: [], statistics: { totalContacts: 0, lastContact: new Date().toISOString() } }
   }
 })
-ipcMain.handle('log:write', (_, data: any) => {
-  const dir = (global as any).logDir || DEFAULT_DIR
-  ensureDirSync(dir)
-  const file = join(dir, 'log.json')
-
-  try {
-    // 确保数据是正确的格式
-    let logData
-    if (data && typeof data === 'object' && 'logs' in data) {
-      // 已经是正确的LogData格式
-      logData = data
-    } else if (Array.isArray(data)) {
-      // 如果是数组，转换为LogData格式
-      logData = {
-        logs: data,
-        statistics: {
-          totalContacts: data.length,
-          lastContact: data.length > 0 ? data[data.length - 1].datetime || new Date().toISOString() : new Date().toISOString()
-        }
-      }
-    } else {
-      console.error('[log:write] 无效的数据格式:', data)
-      return { success: false, error: '无效的数据格式' }
-    }
-
-    writeFileSync(file, JSON.stringify(logData, null, 2))
-    console.log('[log:write] 日志数据写入成功')
-    return { success: true }
-  } catch (error) {
-    console.error('[log:write] 写入日志文件失败:', error)
-    return { success: false, error: error instanceof Error ? error.message : String(error) }
-  }
-})
 
 // 打开日志存储目录
 ipcMain.handle('log:openDir', async () => {
   const dir = (global as any).logDir || DEFAULT_DIR
   // 确保目录存在再打开
-  ensureDirSync(dir)
+  await ensureDirAsync(dir) // 使用异步目录创建
   // 打开资源管理器并选中目录
   await shell.openPath(dir)
 })
 
 // 注册给渲染进程用的版本号通道
-ipcMain.handle('app:getVersion', () => {
+ipcMain.handle('app:getVersion', async () => {
   const pkg = join(app.getAppPath(), 'package.json')
-  return JSON.parse(readFileSync(pkg, 'utf-8')).version
+  return JSON.parse(await fs.readFile(pkg, 'utf-8')).version
 })
 
 // 系统主题读取
@@ -558,13 +636,13 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
   try {
     // 确保目标目录存在
     const destDir = dirname(destPath)
-    ensureDirSync(destDir)
+    await ensureDirAsync(destDir) // 使用异步目录创建
 
     // 开发环境
     if (isDev) {
       const srcPath = join(app.getAppPath(), 'src', 'renderer', 'src', 'assets', fileName)
       console.log('开发环境复制文件:', srcPath, '->', destPath)
-      copyFileSync(srcPath, destPath)
+      await fs.copyFile(srcPath, destPath) // 使用异步复制
       return { success: true }
     }
 
@@ -590,10 +668,15 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
 
     // 首先尝试直接匹配文件名
     for (const path of possiblePaths) {
-      console.log(`检查路径: ${path}, 存在: ${existsSync(path)}`)
-      if (existsSync(path)) {
+      // 使用异步检查文件是否存在
+      try {
+        await fs.access(path)
+        console.log(`找到文件: ${path}`)
         srcPath = path
         break
+      } catch {
+        // 文件不存在，继续尝试下一个路径
+        console.log(`文件不存在: ${path}`)
       }
     }
 
@@ -611,22 +694,22 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
       ]
 
       for (const dir of possibleDirs) {
-        if (existsSync(dir)) {
-          try {
-            const files = readdirSync(dir)
-            // 查找匹配模式的文件（文件名包含原始名称，扩展名相同）
-            const matchedFile = files.find(file => {
-              return file.includes(baseName) && file.endsWith(extension)
-            })
+        // 使用异步检查目录是否存在
+        try {
+          await fs.access(dir)
+          const files = await fs.readdir(dir)
+          // 查找匹配模式的文件（文件名包含原始名称，扩展名相同）
+          const matchedFile = files.find(file => {
+            return file.includes(baseName) && file.endsWith(extension)
+          })
 
-            if (matchedFile) {
-              srcPath = join(dir, matchedFile)
-              console.log(`找到匹配文件: ${srcPath}`)
-              break
-            }
-          } catch (error) {
-            console.error(`读取目录失败: ${dir}`, error)
+          if (matchedFile) {
+            srcPath = join(dir, matchedFile)
+            console.log(`找到匹配文件: ${srcPath}`)
+            break
           }
+        } catch (error) {
+          console.error(`读取目录失败: ${dir}`, error)
         }
       }
     }
@@ -636,7 +719,7 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
     }
 
     console.log('生产环境复制文件:', srcPath, '->', destPath)
-    copyFileSync(srcPath, destPath)
+    await fs.copyFile(srcPath, destPath) // 使用异步复制
     return { success: true }
   } catch (error: any) {
     console.error('Failed to copy asset file:', error)
@@ -655,7 +738,7 @@ ipcMain.handle('get-asset-path', async (_, fileName: string) => {
   try {
     // 首先尝试从resources目录读取
     const resourcePath = join(process.resourcesPath, 'assets', fileName)
-    const fileBuffer = readFileSync(resourcePath)
+    const fileBuffer = await fs.readFile(resourcePath)
     const base64Data = fileBuffer.toString('base64')
 
     // 根据文件扩展名确定MIME类型
@@ -694,20 +777,21 @@ ipcMain.handle('get-user-avatar-path', async () => {
       ? join(app.getAppPath(), 'src', 'renderer', 'src', 'assets', 'userAvatar.png')
       : join(userDataDir, 'userAvatar.png')
 
-    // 检查文件是否存在
-    if (existsSync(avatarPath)) {
+    // 使用异步检查文件是否存在
+    try {
+      await fs.access(avatarPath)
       // 读取文件并返回base64编码的data URL
-      const fileBuffer = readFileSync(avatarPath)
+      const fileBuffer = await fs.readFile(avatarPath)
       const base64Data = fileBuffer.toString('base64')
       return `data:image/png;base64,${base64Data}`
-    } else {
+    } catch {
       // 如果用户头像不存在，返回默认头像
       if (isDev) {
         return new URL(`../renderer/src/assets/userAvatar_default.png`, import.meta.url).href
       } else {
         // 生产环境中，默认头像也需要从资源目录读取
         const defaultAvatarPath = join(process.resourcesPath, 'assets', 'userAvatar_default.png')
-        const fileBuffer = readFileSync(defaultAvatarPath)
+        const fileBuffer = await fs.readFile(defaultAvatarPath)
         const base64Data = fileBuffer.toString('base64')
         return `data:image/png;base64,${base64Data}`
       }
@@ -720,7 +804,7 @@ ipcMain.handle('get-user-avatar-path', async () => {
     } else {
       try {
         const defaultAvatarPath = join(process.resourcesPath, 'assets', 'userAvatar_default.png')
-        const fileBuffer = readFileSync(defaultAvatarPath)
+        const fileBuffer = await fs.readFile(defaultAvatarPath)
         const base64Data = fileBuffer.toString('base64')
         return `data:image/png;base64,${base64Data}`
       } catch (defaultError) {
@@ -737,8 +821,8 @@ ipcMain.handle('show-save-dialog', (_, options) => {
 })
 
 // 写入地图文件
-ipcMain.handle('write-file', (_, path, buffer) => {
-  return writeFile(path, Buffer.from(buffer))
+ipcMain.handle('write-file', async (_, path, buffer) => {
+  return await writeFile(path, Buffer.from(buffer))
 })
 
 // 获取 HAM 地图数据
@@ -752,27 +836,44 @@ ipcMain.handle('get-ham-rss', async () => {
   }) // 异步获取 RSS 内容（后续维护需更换订阅地址则修改这里）
 })
 
-// 当 Electron 完成初始化并准备创建浏览器窗口时调用
-// 一些 API 只能在该事件发生后使用
-app.whenReady().then(() => {
-  // 设置应用用户模型 ID 用于 Windows
-  electronApp.setAppUserModelId('com.hamdesk.app')
 
-  // 检查是否是首次安装或重新安装
-  checkFirstRun()
+// 窗口焦点管理函数
+async function refreshWindowFocus() {
+  const mainWindow = BrowserWindow.getAllWindows()[0]
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    // 记录当前焦点状态
+    const wasFocused = mainWindow.isFocused()
 
-  // 应用启动时确保数据文件存在
-  ensureDataFile()
-  ensureDeviceDataFile()
+    // 如果窗口当前有焦点，先使其失去焦点
+    if (wasFocused) {
+      mainWindow.blur()
 
-  createWindow()
+      // 短暂延迟后重新获得焦点
+      await new Promise(resolve => setTimeout(resolve, 10))
 
-  app.on('activate', function () {
-    // 在 macOS 上，当 dock icon 被点击且没有其他窗口打开时，重新创建窗口
-    // 这是 macOS 应用的标准行为
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+      // 重新聚焦窗口
+      mainWindow.focus()
+    }
+  }
+}
+
+// 包装数据操作IPC处理函数，添加焦点管理
+function wrapIpcWithFocusManagement(channel: string, originalHandler: Function) {
+  ipcMain.handle(channel, async (...args: any[]) => {
+    try {
+      // 执行原始数据操作
+      const result = await originalHandler(...args)
+
+      // 数据操作完成后刷新窗口焦点
+      await refreshWindowFocus()
+
+      return result
+    } catch (error) {
+      console.error(`[${channel}] 操作失败:`, error)
+      throw error
+    }
   })
-})
+}
 
 // 添加全局异常处理，防止应用静默崩溃
 process.on('uncaughtException', (error) => {
@@ -788,6 +889,31 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason) => {
   console.error('未处理的Promise拒绝:', reason)
+})
+
+// 当 Electron 完成初始化并准备创建浏览器窗口时调用
+// 一些 API 只能在该事件发生后使用
+app.whenReady().then(async () => {
+  // 设置应用用户模型 ID 用于 Windows
+  electronApp.setAppUserModelId('com.hamdesk.app')
+
+  // 异步初始化默认目录
+  await initDefaultDir()
+
+  // 检查是否是首次安装或重新安装
+  await checkFirstRun()
+
+  // 应用启动时确保数据文件存在
+  await ensureDataFileAsync()
+  await ensureDeviceDataFileAsync()
+
+  createWindow()
+
+  app.on('activate', function () {
+    // 在 macOS 上，当 dock icon 被点击且没有其他窗口打开时，重新创建窗口
+    // 这是 macOS 应用的标准行为
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
 })
 
 // 当所有窗口关闭时调用

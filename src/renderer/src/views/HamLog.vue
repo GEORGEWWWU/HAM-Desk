@@ -28,6 +28,7 @@
         <table>
           <thead>
             <tr>
+              <th><input type="checkbox" v-model="selectedAll"></th>
               <th>日期时间</th>
               <th>呼号 <span class="rxtext">RX</span></th>
               <th>频率 <span class="txtext">TX</span></th>
@@ -35,15 +36,14 @@
               <th>信号 <span class="txtext">TX</span></th>
               <th>信号 <span class="rxtext">RX</span></th>
               <th>发射功率</th>
-              <th>对方设备</th>
               <th>对方位置</th>
-              <th>通联内容</th>
-              <th>QSL状态</th>
+              <th>QSL状态 <span class="txtext">TX</span><span class="rxtext">RX</span></th>
             </tr>
           </thead>
           <tbody>
             <template v-for="i in pageSize" :key="i">
               <tr v-if="currentPageData[i - 1]">
+                <td><input type="checkbox" :value="currentPageData[i - 1].id" v-model="selectedItems"></td>
                 <td>{{ currentPageData[i - 1].datetime }}</td>
                 <td>{{ currentPageData[i - 1].call }}</td>
                 <td>{{ currentPageData[i - 1].freq }}</td>
@@ -51,13 +51,11 @@
                 <td>{{ currentPageData[i - 1].rstS }}</td>
                 <td>{{ currentPageData[i - 1].rstR }}</td>
                 <td>{{ currentPageData[i - 1].power }}</td>
-                <td>{{ currentPageData[i - 1].device }}</td>
-                <td>{{ currentPageData[i - 1].qth }}</td>
-                <td>{{ currentPageData[i - 1].message }}</td>
+                <td style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{
+                  currentPageData[i - 1].qth }}</td>
                 <td>{{ currentPageData[i - 1].qsl }}</td>
               </tr>
               <tr v-else>
-                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -86,7 +84,9 @@
           <button class="pagebtn" @click="nextPage" :disabled="currentPage === totalPages">
             <img :src="getIconPath('rightar')">
           </button>
-          <button class="optbtn">选项操作</button>
+          <button class="optbtn" @click="editSelected" :disabled="selectedItems.length !== 1">编辑记录</button>
+          <button class="optbtn" @click="deleteSelected" :disabled="selectedItems.length === 0 || isEditing">删除选中 ({{
+            selectedItems.length }})</button>
         </div>
       </div>
     </div>
@@ -99,7 +99,7 @@
           <!--QSO呼号容器-->
           <div class="edit_item">
             <div class="edit_title">
-              <p>QSO 与</p>
+              <p>{{ isEditing ? '编辑 QSO 与' : 'QSO 与' }}</p>
             </div>
             <div class="edit_callinfo">
               <p>{{ editCallsignValue }}</p>
@@ -228,6 +228,15 @@
               </div>
             </div>
           </div>
+          <!--QTH位置-->
+          <div class="edit_item">
+            <div class="edit_title">
+              <p>QTH</p>
+            </div>
+            <div class="edit_qth">
+              <input type="text" placeholder="输入对方位置" v-model="qthValue">
+            </div>
+          </div>
           <!--更多细节添加按钮-->
           <div class="edit_item">
             <div class="edit_title">
@@ -247,9 +256,9 @@
         </div>
         <!--提交按钮-->
         <div class="edit_submit">
-          <button class="savebtn">
+          <button class="savebtn" @click="saveQSO">
             <img :src="getIconPath('保存')">
-            <h2>保存记录</h2>
+            <h2>{{ isEditing ? '更新记录' : '保存记录' }}</h2>
           </button>
           <button @click="cancelEditQSO">
             <h2>取消</h2>
@@ -265,7 +274,8 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useTheme } from '../function/useTheme'
 import { useLog } from '../function/useLog'
 const theme = useTheme()
-const { logs } = useLog()
+// 修正：在setup顶级作用域中调用一次useLog，而不是在事件处理函数中重复调用
+const { logs, save, deleteLogEntry } = useLog()
 
 // 输入框聚焦状态
 const isInputFocused = ref(false)
@@ -298,6 +308,132 @@ const qslReceivedStatus = ref('未接收')
 // QSL卡片发送和接收日期
 const qslSentDate = ref('')
 const qslReceivedDate = ref('')
+// QTH位置
+const qthValue = ref('')
+
+// 全选功能相关变量
+const selectedItems = ref<string[]>([])
+const selectedAll = ref(false)
+const isEditing = ref(false)
+const editingId = ref<string | null>(null)
+
+// 全选/取消全选
+watch(selectedAll, (newValue) => {
+  if (newValue) {
+    // 全选当前页的所有项目
+    selectedItems.value = currentPageData.value.map(item => item.id)
+  } else {
+    // 取消全选
+    selectedItems.value = []
+  }
+})
+
+// 监听单个选择变化，更新全选状态
+watch(selectedItems, (newItems) => {
+  const currentPageIds = currentPageData.value.map(item => item.id)
+  const allCurrentPageSelected = currentPageIds.every(id => newItems.includes(id))
+
+  // 如果当前页全部选中，则全选框也选中
+  selectedAll.value = allCurrentPageSelected
+}, { deep: true })
+
+// 删除选中的日志
+const deleteSelected = () => {
+  if (selectedItems.value.length === 0) return
+
+  if (confirm(`确定要删除选中的 ${selectedItems.value.length} 条日志记录吗？`)) {
+    // 使用Promise.all来等待所有删除操作完成
+    Promise.all(selectedItems.value.map(id => deleteLogEntry(id)))
+      .then(() => {
+        // 清空选中项
+        selectedItems.value = []
+        selectedAll.value = false
+      })
+      .catch(error => {
+        console.error('删除日志失败:', error)
+        alert('删除日志失败，请重试')
+      })
+  }
+}
+
+// 编辑选中的日志
+const editSelected = () => {
+  if (selectedItems.value.length !== 1) return
+
+  // 获取选中的日志ID
+  const selectedId = selectedItems.value[0]
+
+  // 查找对应的日志条目
+  const logEntry = logs.value.find(log => log.id === selectedId)
+
+  if (logEntry) {
+    // 设置编辑状态和ID
+    isEditing.value = true
+    editingId.value = selectedId
+
+    // 填充表单数据
+    editCallsignValue.value = logEntry.call
+    frequencyValue.value = logEntry.freq
+    selectedMode.value = logEntry.mode
+    txSignalValue.value = logEntry.rstS
+    rxSignalValue.value = logEntry.rstR
+    powerValue.value = logEntry.power
+    qthValue.value = logEntry.qth
+
+    // 设置日期时间
+    const datetime = new Date(logEntry.datetime)
+    if (dateInput.value) {
+      dateInput.value.value = datetime.toISOString().split('T')[0]
+    }
+    if (timeInput.value) {
+      timeInput.value.value = datetime.toTimeString().slice(0, 5)
+    }
+
+    // 加载通联内容（如果存在）
+    if (logEntry.message) {
+      showContent.value = true
+      // 使用nextTick确保DOM更新后再设置textarea的值
+      nextTick(() => {
+        const textarea = document.querySelector('textarea[name="radio_content"]') as HTMLTextAreaElement
+        if (textarea) {
+          textarea.value = logEntry.message
+        }
+      })
+    } else {
+      showContent.value = false
+    }
+
+    // 加载QSL卡片信息（如果存在）
+    if (logEntry.qsl) {
+      showQSL.value = true
+      // 解析QSL状态，格式为"发送状态/接收状态"
+      const qslParts = logEntry.qsl.split('/')
+      if (qslParts.length >= 2) {
+        qslSentStatus.value = qslParts[0] || '未发送'
+        qslReceivedStatus.value = qslParts[1] || '未接收'
+      }
+
+      // 加载QSL发送日期（如果存在）
+      if (logEntry.qslSentDate) {
+        qslSentDate.value = logEntry.qslSentDate
+      }
+
+      // 加载QSL接收日期（如果存在）
+      if (logEntry.qslReceivedDate) {
+        qslReceivedDate.value = logEntry.qslReceivedDate
+      }
+    } else {
+      showQSL.value = false
+      qslSentStatus.value = '未发送'
+      qslReceivedStatus.value = '未接收'
+      qslSentDate.value = ''
+      qslReceivedDate.value = ''
+    }
+
+    // 打开编辑弹窗
+    showEditQSO.value = true
+  }
+}
 
 // 处理呼号输入，只允许字母和数字，并转换为大写
 const handleCallsignInput = (event: Event) => {
@@ -598,6 +734,9 @@ const currentPageData = computed(() => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
+    // 切换页面时重置选择状态
+    selectedItems.value = []
+    selectedAll.value = false
   }
 }
 
@@ -605,6 +744,9 @@ const prevPage = () => {
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
+    // 切换页面时重置选择状态
+    selectedItems.value = []
+    selectedAll.value = false
   }
 }
 
@@ -685,6 +827,15 @@ const handleQslReceivedStatusChange = (event: Event) => {
 const cancelEditQSO = () => {
   showEditQSO.value = false
   editCallsignValue.value = ''
+
+  // 如果是编辑模式，重置编辑状态
+  if (isEditing.value) {
+    isEditing.value = false
+    editingId.value = null
+  }
+
+  // 重置表单
+  resetForm()
 }
 
 // 处理QSL接收日期变化
@@ -696,6 +847,146 @@ const handleQslReceivedDateChange = (event: Event) => {
   if (target.value) {
     qslReceivedStatus.value = '已接收'
   }
+}
+
+// 保存QSO记录
+const saveQSO = () => {
+  // 获取日期和时间输入框的值
+  const dateValue = dateInput.value?.value || ''
+  const timeValue = timeInput.value?.value || ''
+
+  // 验证必填字段
+  if (!dateValue || !timeValue || !frequencyValue.value || !selectedMode.value ||
+    !txSignalValue.value || !rxSignalValue.value || !powerValue.value || !qthValue.value) {
+    alert('请填写所有必填字段：日期时间、频率、模式、信号强度、功率和QTH位置')
+    return
+  }
+
+  // 获取通联内容（如果显示）
+  let contentValue = ''
+  if (showContent.value) {
+    const textarea = document.querySelector('textarea[name="radio_content"]') as HTMLTextAreaElement
+    contentValue = textarea?.value || ''
+  }
+
+  // 构建QSO记录对象，确保所有属性都是可序列化的
+  const qsoRecord: any = {
+    id: isEditing.value ? editingId.value! : (Date.now().toString(36) + Math.random().toString(36).substr(2)), // 编辑时使用原ID，新建时生成新ID
+    datetime: `${dateValue} ${timeValue}`,
+    call: editCallsignValue.value,
+    freq: frequencyValue.value,
+    mode: selectedMode.value,
+    rstS: txSignalValue.value,
+    rstR: rxSignalValue.value,
+    power: powerValue.value,
+    qth: qthValue.value, // 位置字段，从输入框获取
+    message: contentValue, // 通联内容
+    qsl: `${qslSentStatus.value}/${qslReceivedStatus.value}`,
+  }
+
+  // 如果QSL发送状态为已发送且有日期，添加发送日期
+  if (qslSentStatus.value === '已发送' && qslSentDate.value) {
+    qsoRecord.qslSentDate = qslSentDate.value
+  }
+
+  // 如果QSL接收状态为已接收且有日期，添加接收日期
+  if (qslReceivedStatus.value === '已接收' && qslReceivedDate.value) {
+    qsoRecord.qslReceivedDate = qslReceivedDate.value
+  }
+
+  // 确保对象是可序列化的
+  const serializableRecord = JSON.parse(JSON.stringify(qsoRecord))
+
+  if (isEditing.value) {
+    // 编辑模式：找到并更新现有记录
+    const index = logs.value.findIndex(log => log.id === editingId.value)
+    if (index !== -1) {
+      // 保留原始位置，只更新内容
+      logs.value[index] = serializableRecord
+
+      // 构建包含logs数组的对象
+      const logData = {
+        logs: logs.value,
+        statistics: {
+          totalContacts: logs.value.length,
+          lastContact: logs.value.length > 0 ? logs.value[0].datetime : ''
+        }
+      }
+
+      // 确保整个logData对象是可序列化的
+      const serializableLogData = JSON.parse(JSON.stringify(logData))
+
+      // 保存数据
+      window.electronAPI.logWrite(serializableLogData)
+        .then(() => {
+          console.log('日志更新成功')
+        })
+        .catch(err => {
+          console.error('日志更新失败:', err)
+          alert('更新日志失败，请重试')
+        })
+    }
+
+    // 重置编辑状态
+    isEditing.value = false
+    editingId.value = null
+
+    // 重置选择状态
+    selectedItems.value = []
+    selectedAll.value = false
+  } else {
+    // 新建模式：使用save函数添加新记录
+    save(serializableRecord)
+
+    // 重置选择状态
+    selectedItems.value = []
+    selectedAll.value = false
+  }
+
+  // 关闭弹窗
+  showEditQSO.value = false
+  editCallsignValue.value = ''
+
+  // 使用nextTick确保DOM更新完成后再重置表单并聚焦输入框
+  nextTick(() => {
+    // 重置表单
+    resetForm()
+
+    // 重新聚焦到呼号输入框
+    if (callsignInput.value) {
+      callsignInput.value.focus()
+      isInputFocused.value = true
+    }
+  })
+}
+
+// 重置表单
+const resetForm = () => {
+  // 重置日期时间
+  if (dateInput.value) dateInput.value.value = ''
+  if (timeInput.value) timeInput.value.value = ''
+
+  // 重置其他字段
+  selectedMode.value = 'FM'
+  frequencyValue.value = '420.000'
+  txSignalValue.value = '59'
+  rxSignalValue.value = '59'
+  powerValue.value = '5'
+  qthValue.value = '' // 重置QTH位置
+
+  // 重置通联内容
+  showContent.value = false
+  const textarea = document.querySelector('textarea[name="radio_content"]') as HTMLTextAreaElement
+  if (textarea) {
+    textarea.value = ''
+  }
+
+  // 重置QSL卡片状态
+  showQSL.value = false
+  qslSentStatus.value = '未发送'
+  qslReceivedStatus.value = '未接收'
+  qslSentDate.value = ''
+  qslReceivedDate.value = ''
 }
 </script>
 

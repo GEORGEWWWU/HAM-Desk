@@ -126,8 +126,12 @@ const handleAddDevice = async () => {
     console.log('调用addDevice函数')
     await addDevice(deviceName.value.trim(), getDeviceTypeName(deviceType.value))
     console.log('设备添加成功，准备重置表单')
-    resetForm()
-    console.log('表单已重置')
+    
+    // 使用nextTick确保DOM更新完成后再重置表单
+    nextTick(() => {
+      resetForm()
+      console.log('表单已重置')
+    })
   } catch (error) {
     console.error('添加设备失败:', error)
     alert('添加设备失败: ' + (error as Error).message)
@@ -143,7 +147,11 @@ const handleEditDevice = async () => {
 
   try {
     await editDevice(editingDevice.value.id, deviceName.value.trim(), getDeviceTypeName(deviceType.value))
-    resetForm()
+    
+    // 使用nextTick确保DOM更新完成后再重置表单
+    nextTick(() => {
+      resetForm()
+    })
   } catch (error) {
     alert('编辑设备失败: ' + (error as Error).message)
   }

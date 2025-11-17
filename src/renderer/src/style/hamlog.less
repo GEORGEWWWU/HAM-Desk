@@ -90,6 +90,7 @@
 
           span {
             font-size: 13px;
+            font-weight: bold;
             color: var(--primary-color);
             opacity: 1;
           }
@@ -336,7 +337,7 @@
           align-items: center;
           gap: 13px;
           border-bottom: solid 1px var(--system-item-border-color);
-          padding: 13px 0;
+          padding: 10px 0;
 
           // QSO标题容器
           .edit_title {
@@ -773,6 +774,23 @@
                 letter-spacing: 1px;
                 transition: all 0.12s ease-in-out;
               }
+            }
+          }
+
+          .edit_qth{
+            input{
+              height: 38px;
+              font-size: 16px;
+              border: solid 1px var(--system-item-border-color);
+              outline: none;
+              padding: 0 10px;
+              background: var(--device-manage-bg-color);
+              color: var(--text-color);
+              font-family: Arial, Helvetica, sans-serif;
+              opacity: 0.8;
+              cursor: pointer;
+              letter-spacing: 1px;
+              transition: all 0.12s ease-in-out;
             }
           }
 

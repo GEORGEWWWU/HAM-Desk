@@ -1,3 +1,9 @@
 {
-  "deviceList": []
+  "deviceList": [
+    {
+      "id": 1,
+      "deviceName": "11",
+      "deviceType": "其他"
+    }
+  ]
 }

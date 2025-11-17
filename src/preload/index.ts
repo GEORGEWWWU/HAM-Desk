@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   logResetDir: () => ipcRenderer.invoke('log:resetDir'),
   logSelectDir: () => ipcRenderer.invoke('log:selectDir'),
   logRead: () => ipcRenderer.invoke('log:read'),
-  logWrite: (d: any[]) => ipcRenderer.invoke('log:write', d),
+  logWrite: (d: any) => ipcRenderer.invoke('log:write', d),
   logOpenDir: () => ipcRenderer.invoke('log:openDir'),
   // 应用版本相关
   getAppVersion: () => ipcRenderer.invoke('app:getVersion'),

@@ -1,35 +1,47 @@
 {
   "logs": [
     {
-      "id": "20251115_1",
-      "datetime": "2025-11-15 14:32:23",
-      "call": "对方呼号",
-      "freq": "通联频率",
-      "mode": "发射模式",
-      "rstS": "发送信号报告",
-      "rstR": "接收信号报告",
-      "power": "发射功率",
-      "device": "对方设备",
-      "qth": "对方位置",
-      "message": "通联内容",
-      "qsl": "QSL状态"
+      "id": "mi2sy4hpa01pg9rfa3f",
+      "datetime": "2025-11-17 15:07",
+      "call": "BA8AYY",
+      "freq": "438.500",
+      "mode": "FM",
+      "rstS": "599",
+      "rstR": "599",
+      "power": "5",
+      "qth": "大学城",
+      "message": "信号测试",
+      "qsl": "未发送/未接收"
     },
     {
-      "id": "20251114_1",
-      "datetime": "2025-11-14 22:12:09",
-      "call": "对方呼号",
-      "freq": "通联频率",
-      "mode": "发射模式",
-      "rstS": "发送信号报告",
-      "rstR": "接收信号报告",
-      "power": "发射功率",
-      "device": "对方设备",
-      "qth": "对方位置",
-      "message": "通联内容",
-      "qsl": "QSL状态"
+      "id": "mi2p0d7bg9cmi4va0xa",
+      "datetime": "2025-11-17 13:16",
+      "call": "BA8AYY",
+      "freq": "438.500",
+      "mode": "FM",
+      "rstS": "599",
+      "rstR": "599",
+      "power": "5",
+      "qth": "大学城",
+      "message": "",
+      "qsl": "未发送/未接收"
+    },
+    {
+      "id": "mi2p1a1wj7otrmtkyag",
+      "datetime": "2025-11-13 19:06",
+      "call": "BH8CCY",
+      "freq": "439.950",
+      "mode": "FM",
+      "rstS": "599",
+      "rstR": "599",
+      "power": "5",
+      "qth": "宜宾西站",
+      "message": "",
+      "qsl": "未发送/未接收"
     }
   ],
   "statistics": {
-    "lastContact": "2025-11-15 14:30:00"
+    "totalContacts": 3,
+    "lastContact": "2025-11-13 19:06"
   }
 }

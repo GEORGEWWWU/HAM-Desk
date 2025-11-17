@@ -19,8 +19,8 @@ declare global {
       logSetDir(dir: string): Promise<void>
       logResetDir(): Promise<string>
       logSelectDir(): Promise<string | null>
-      logRead(): Promise<any[]>
-      logWrite(d: any[]): Promise<void>
+      logRead(): Promise<any>
+      logWrite(d: any): Promise<void>
       // 应用版本相关
       getAppVersion(): Promise<string>
       // 文件操作相关

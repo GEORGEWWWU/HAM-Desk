@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useTheme } from '../function/useTheme'
 import { useDevice } from '../function/useDevice'
 import DeviceManage from '../components/DeviceManage.vue'
@@ -206,7 +206,10 @@ async function saveUser() {
   if (JSON.stringify(plain) === JSON.stringify(currentUser)) return
   const merged = await window.electronAPI.userWrite(plain)
   Object.assign(user, merged)
-  isEdit.value = false
+  // 使用nextTick确保DOM更新完成后再关闭编辑窗口
+  nextTick(() => {
+    isEdit.value = false
+  })
   // window.location.reload();
 }
 // 系统通知相关

@@ -7,8 +7,8 @@ export interface ElectronAPI {
   logSetDir(dir: string): Promise<void>
   logResetDir(): Promise<string>
   logSelectDir(): Promise<string | null>
-  logRead(): Promise<any[]>
-  logWrite(d: any[]): Promise<void>
+  logRead(): Promise<any>
+  logWrite(d: any): Promise<void>
   logOpenDir(): Promise<void>
   getAppVersion(): Promise<string>
 }
