@@ -294,12 +294,12 @@
     }
   }
 
-  .editQSO{
+  // 编辑QSO弹窗
+  .editQSO {
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+    display: grid;
+    justify-items: center;
     align-items: center;
     position: fixed;
     top: 0;
@@ -307,6 +307,586 @@
     backdrop-filter: blur(4px);
     background: var(--bg-color-aside-button);
     z-index: 999;
+    animation: edit_fadein 0.3s ease-in-out;
+
+    .edit_container {
+      width: 90%;
+      height: auto;
+      background: var(--device-manage-bg-color);
+      border: solid 1px var(--system-item-border-color);
+      border-radius: 6px;
+      padding: 13px;
+      box-sizing: border-box;
+      transform: translateX(25px);
+      display: grid;
+      justify-items: center;
+
+      // 编辑表单
+      .editform {
+        width: 98%;
+        display: grid;
+        justify-items: center;
+        align-content: flex-start;
+
+        .edit_item {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          justify-content: left;
+          align-items: center;
+          gap: 13px;
+          border-bottom: solid 1px var(--system-item-border-color);
+          padding: 13px 0;
+
+          // QSO标题容器
+          .edit_title {
+            min-width: 90px;
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+            transition: all 0.12s ease-in-out;
+
+            p {
+              font-size: 16px;
+            }
+          }
+
+          // QSO呼号容器
+          .edit_callinfo {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+
+            p {
+              font-size: 18px;
+              font-weight: bold;
+            }
+          }
+
+          // QSO日期时间容器
+          .edit_datetime {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+
+            .datetime_input {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              input {
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+              }
+
+              button {
+                height: 38px;
+                border-radius: 0 4px 4px 0;
+                padding: 0 10px;
+                background: var(--primary-color);
+                opacity: 0.8;
+                transition: all 0.12s ease-in-out;
+
+                &:hover {
+                  opacity: 1;
+                }
+
+                h2 {
+                  font-size: 15px;
+                  font-weight: normal;
+                  transform: translateY(-1px);
+                  color: var(--checkversion-text-color);
+                }
+              }
+            }
+          }
+
+          // QSO通联频率和发射模式容器
+          .edit_freqmode {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+            gap: 13px;
+
+            .freq_input {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              input {
+                width: 100px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+              }
+            }
+
+            .mode_input {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              select {
+                width: 100px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+                border-radius: 0 4px 4px 0;
+              }
+
+              button {
+                height: 38px;
+                // border-radius: 0 4px 4px 0;
+                padding: 0 15px;
+                background: var(--primary-color);
+                opacity: 0.8;
+                transition: all 0.12s ease-in-out;
+
+                &:hover {
+                  opacity: 1;
+                }
+
+                h2 {
+                  font-size: 15px;
+                  font-weight: normal;
+                  color: var(--checkversion-text-color);
+                }
+              }
+
+              .lastbtn {
+                border-radius: 0 4px 4px 0;
+              }
+            }
+          }
+
+          // RST信号报告和功率容器
+          .edit_rstpower {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+            gap: 13px;
+
+            .txrst_input {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              input {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+                letter-spacing: 1px;
+                transition: all 0.12s ease-in-out;
+              }
+
+              button {
+                height: 38px;
+                padding: 0 13px;
+                background: var(--primary-color);
+                opacity: 0.8;
+                transition: all 0.12s ease-in-out;
+
+                &:hover {
+                  opacity: 1;
+                }
+
+                h2 {
+                  font-size: 15px;
+                  font-weight: normal;
+                  color: var(--checkversion-text-color);
+                }
+              }
+
+              .lastbtn {
+                border-radius: 0 4px 4px 0;
+              }
+            }
+
+            .rxrst_input {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              input {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+                letter-spacing: 1px;
+                transition: all 0.12s ease-in-out;
+              }
+
+              button {
+                height: 38px;
+                padding: 0 13px;
+                background: var(--primary-color);
+                opacity: 0.8;
+                transition: all 0.12s ease-in-out;
+
+                &:hover {
+                  opacity: 1;
+                }
+
+                h2 {
+                  font-size: 15px;
+                  font-weight: normal;
+                  color: var(--checkversion-text-color);
+                }
+              }
+
+              .lastbtn {
+                border-radius: 0 4px 4px 0;
+              }
+            }
+
+            .power_input {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              input {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+                letter-spacing: 1px;
+                transition: all 0.12s ease-in-out;
+              }
+            }
+          }
+
+          // 通联内容
+          .edit_content {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+
+            textarea {
+              width: 638px;
+              min-height: 50px;
+              max-height: 100px;
+              font-size: 16px;
+              border: solid 1px var(--system-item-border-color);
+              outline: none;
+              padding: 5px;
+              background: var(--device-manage-bg-color);
+              color: var(--text-color);
+              font-family: Arial, Helvetica, sans-serif;
+              opacity: 0.8;
+              cursor: pointer;
+              letter-spacing: 1px;
+              transition: all 0.12s ease-in-out;
+              resize: vertical;
+            }
+          }
+
+          // QSL卡片
+          .edit_qslcard {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+            gap: 13px;
+
+            .qslcard_btn {
+              height: 38px;
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              border: solid 1px var(--system-item-border-color);
+              box-shadow: 0 0 4px var(--system-item-border-color);
+              border-radius: 4px;
+
+              p {
+                font-size: 16px;
+                padding: 8px 10px;
+                color: var(--primary-color);
+                font-weight: bold;
+                opacity: 0.8;
+                background: var(--system-item-button-bg-color);
+              }
+
+              select {
+                min-width: 38px;
+                max-width: 90px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+                letter-spacing: 1px;
+                transition: all 0.12s ease-in-out;
+              }
+
+              input[type="date"] {
+                width: 120px;
+                height: 38px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                background: var(--device-manage-bg-color);
+                color: var(--text-color);
+                font-family: Arial, Helvetica, sans-serif;
+                opacity: 0.8;
+                cursor: pointer;
+                letter-spacing: 1px;
+                transition: all 0.12s ease-in-out;
+              }
+            }
+          }
+
+          // 更多细节
+          .edit_more {
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: center;
+
+            .more_btn {
+              display: flex;
+              flex-direction: row;
+              justify-content: left;
+              align-items: center;
+              gap: 13px;
+
+              button {
+                height: 38px;
+                padding: 0 15px;
+                background: var(--system-item-button-bg-color);
+                opacity: 0.8;
+                border-radius: 4px;
+                transition: all 0.12s ease-in-out;
+
+                &:hover {
+                  opacity: 1;
+                }
+
+                h2 {
+                  font-size: 15px;
+                  font-weight: bold;
+                  color: var(--text-color);
+                }
+              }
+            }
+          }
+
+          @media screen and (min-width: 980px) {
+            .edit_title {
+              width: 100px;
+            }
+
+            .txrst_input,
+            .rxrst_input,
+            .power_input {
+              input {
+                width: 45px !important;
+              }
+            }
+          }
+        }
+      }
+
+      // 提交按钮
+      .edit_submit {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: right;
+        align-items: center;
+        gap: 13px;
+        padding-top: 10px;
+
+        button {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          gap: 6px;
+          height: 38px;
+          padding: 0 15px;
+          background: var(--system-item-button-bg-color);
+          border-radius: 4px;
+          transition: all 0.12s ease-in-out;
+          margin-right: 5px;
+          transition: all 0.12s ease-in-out;
+
+          &:active {
+            transform: scale(0.98);
+          }
+
+          img {
+            width: 18px;
+            height: 18px;
+            transform: translateY(1px);
+          }
+
+          h2 {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--text-color);
+          }
+        }
+
+        .savebtn {
+          background: var(--checkversion-bg-color);
+
+          h2 {
+            color: var(--checkversion-text-color);
+          }
+        }
+      }
+    }
+  }
+
+  @keyframes edit_fadein {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
   }
 }
 

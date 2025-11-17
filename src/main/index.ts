@@ -147,8 +147,8 @@ function createWindow(): void {
     height: 640,
     minWidth: 900,
     minHeight: 640,
-    maxWidth: 984,
-    maxHeight: 708,
+    maxWidth: 998,
+    maxHeight: 725,
     show: false,
     autoHideMenuBar: true,
     icon: icon,
@@ -159,7 +159,7 @@ function createWindow(): void {
     }
   })
 
-  // 锁定窗口宽高比例（900:640 ≈ 1.41:1）
+  // 锁定窗口宽高比例
   mainWindow.setAspectRatio(900 / 640)
 
   mainWindow.on('ready-to-show', () => {
