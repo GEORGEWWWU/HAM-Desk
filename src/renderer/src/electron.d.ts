@@ -45,6 +45,8 @@ declare global {
       getHamRss: () => Promise<string>
       // HAM地图相关
       openHamMaps: () => Promise<void>
+      // 获取所有JSON文件数据
+      getAllJsonFiles: () => Promise<{ [fileName: string]: any }>
     }
   }
 }

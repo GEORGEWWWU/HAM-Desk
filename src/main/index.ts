@@ -53,18 +53,18 @@ async function checkFirstRun() {
   try {
     // 获取当前应用版本
     const currentVersion = app.getVersion()
-    console.log('当前应用版本:', currentVersion)
+    console.log('Current app version:', currentVersion)
 
     // 检查版本标记文件是否存在且版本一致
     let isVersionChanged = false
     try {
       const savedVersion = await fs.readFile(versionFlagPath, 'utf-8')
       isVersionChanged = savedVersion !== currentVersion
-      console.log('已保存版本:', savedVersion, '版本是否变化:', isVersionChanged)
+      console.log('Saved version:', savedVersion, 'Version changed:', isVersionChanged)
     } catch {
       // 版本文件不存在，说明是首次安装或版本文件被删除
       isVersionChanged = true
-      console.log('版本文件不存在，标记为需要重置')
+      console.log('Version file not found, marking as reset needed')
     }
 
     // 检查首次运行标记文件是否存在
@@ -78,7 +78,7 @@ async function checkFirstRun() {
 
     // 如果是首次运行或版本变化，则重置数据
     if (isFirstRun || isVersionChanged) {
-      console.log('检测到首次安装或版本变化，正在重置应用数据...')
+      console.log('First run or version change detected, resetting app data...')
 
       // 重置应用数据
       await resetAppData()
@@ -89,10 +89,10 @@ async function checkFirstRun() {
       // 创建版本标记文件
       await fs.writeFile(versionFlagPath, currentVersion)
 
-      console.log('应用数据重置完成')
+      console.log('App data reset completed')
     }
   } catch (error) {
-    console.error('检查首次安装状态时出错:', error)
+    console.error('Error checking first run status:', error)
   }
 }
 
@@ -117,12 +117,12 @@ async function resetAppData() {
           await fs.access(filePath)
           // 如果文件存在，删除它
           await fs.unlink(filePath)
-          console.log(`已删除文件: ${filePath}`)
+          console.log(`Deleted file: ${filePath}`)
         } catch {
           // 文件不存在，跳过
         }
       } catch (error) {
-        console.error(`删除文件失败 ${filePath}:`, error)
+        console.error(`Failed to delete file ${filePath}:`, error)
       }
     }
 
@@ -140,19 +140,19 @@ async function resetAppData() {
         }
         // 删除空目录
         await fs.rmdir(dataDir)
-        console.log(`已删除目录: ${dataDir}`)
+        console.log(`Deleted directory: ${dataDir}`)
       } catch {
         // 目录不存在，跳过
       }
     } catch (error) {
-      console.error(`删除目录失败 ${dataDir}:`, error)
+      console.error(`Failed to delete directory ${dataDir}:`, error)
     }
 
     // 重新创建默认数据文件
     await ensureDataFileAsync()
     await ensureDeviceDataFileAsync()
   } catch (error) {
-    console.error('重置应用数据时出错:', error)
+    console.error('Error resetting app data:', error)
   }
 }
 
@@ -186,7 +186,7 @@ function createWindow(): void {
 
   // 添加页面加载失败处理
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
-    console.error('页面加载失败:', errorCode, errorDescription)
+    console.error('Page load failed:', errorCode, errorDescription)
     // 即使加载失败也显示窗口，避免应用卡在后台
     mainWindow.show()
   })
@@ -212,7 +212,7 @@ function createWindow(): void {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html')).catch(err => {
-      console.error('加载HTML文件失败:', err)
+      console.error('Failed to load HTML file:', err)
       // 即使加载失败也显示窗口
       mainWindow.show()
     })
@@ -272,7 +272,7 @@ function createMapsWindow(): void {
     : `file://${join(__dirname, '../renderer/maps.html')}`
 
   mapsWindow.loadURL(mapsHTML).catch(err => {
-    console.error('加载地图HTML文件失败:', err)
+    console.error('Failed to load maps HTML file:', err)
     // 即使加载失败也显示窗口
     mapsWindow!.show()
   })
@@ -579,6 +579,37 @@ ipcMain.handle('log:openDir', async () => {
   await ensureDirAsync(dir) // 使用异步目录创建
   // 打开资源管理器并选中目录
   await shell.openPath(dir)
+})
+
+// 获取data目录下所有JSON文件
+ipcMain.handle('data:getAllJsonFiles', async () => {
+  try {
+    const dir = (global as any).logDir || DEFAULT_DIR
+    await ensureDirAsync(dir) // 确保目录存在
+    
+    // 读取目录中的所有文件
+    const files = await fs.readdir(dir)
+    
+    // 过滤出JSON文件
+    const jsonFiles = files.filter(file => file.endsWith('.json'))
+    
+    // 读取每个JSON文件的内容
+    const jsonData = {}
+    for (const file of jsonFiles) {
+      const filePath = join(dir, file)
+      try {
+        const content = await fs.readFile(filePath, 'utf-8')
+        jsonData[file] = JSON.parse(content)
+      } catch (error) {
+        console.error(`Failed to read file ${file}:`, error)
+      }
+    }
+    
+    return jsonData
+  } catch (error) {
+    console.error('Failed to get JSON files:', error)
+    return {}
+  }
 })
 
 // 注册给渲染进程用的版本号通道

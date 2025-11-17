@@ -54,7 +54,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // HAM 地图数据相关
   getHamRss: () => ipcRenderer.invoke('get-ham-rss'),
   // HAM地图相关
-  openHamMaps: () => ipcRenderer.invoke('open-ham-maps')
+  openHamMaps: () => ipcRenderer.invoke('open-ham-maps'),
+  // 数据导出相关
+  getAllJsonFiles: () => ipcRenderer.invoke('data:getAllJsonFiles')
 })
 
 // 监听系统主题变化事件

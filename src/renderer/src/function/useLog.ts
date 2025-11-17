@@ -161,7 +161,7 @@ export function useLog() {
     }
   }
 
-  // 保存一条日志条目 - 非阻塞版本
+  // 保存日志
   async function save(entry: LogEntry) {
     try {
       // 将新条目添加到logs数组的开头，而不是结尾
@@ -188,33 +188,7 @@ export function useLog() {
     }
   }
 
-  // 更改目录
-  async function changeDir() {
-    try {
-      const dir = await window.electronAPI.logSelectDir()
-      if (dir) {
-        await window.electronAPI.logSetDir(dir)
-        logDir.value = dir
-        logs.value = await window.electronAPI.logRead()
-      }
-    } catch (err) {
-      console.error('更改日志目录失败:', err)
-      error.value = err instanceof Error ? err.message : '更改目录失败'
-    }
-  }
-
-  // 恢复默认
-  async function resetDir() {
-    try {
-      logDir.value = await window.electronAPI.logResetDir()
-      logs.value = await window.electronAPI.logRead()
-    } catch (err) {
-      console.error('恢复默认目录失败:', err)
-      error.value = err instanceof Error ? err.message : '恢复默认目录失败'
-    }
-  }
-
-  // 添加一个删除日志条目的方法
+  // 删除日志
   async function deleteLogEntry(id: string) {
     try {
       const index = logs.value.findIndex(entry => entry.id === id)
@@ -246,9 +220,7 @@ export function useLog() {
     logDir,
     logs,
     save,
-    changeDir,
-    resetDir,
-    deleteLogEntry, // 导出删除方法
+    deleteLogEntry,
     isSaving,
     error
   }

@@ -171,14 +171,11 @@
               <div class="log_item_box">
                 <div class="saveLocation_title">
                   <p>日志存储位置</p>
-                  <span :title="logDir" @click="openLogDir">{{ logDir }}</span>
+                  <span>{{ logDir }}</span>
                 </div>
                 <div class="saveLocation_button">
-                  <button @click="resetDir">
-                    <p>恢复默认</p>
-                  </button>
-                  <button @click="changeDir">
-                    <p>更改</p>
+                  <button :title="logDir" @click="openLogDir">
+                    <p>打开目录</p>
                   </button>
                 </div>
               </div>
@@ -187,7 +184,7 @@
                   <p>数据备份</p>
                 </div>
                 <div class="dataCopy_button">
-                  <button class="export_button">
+                  <button class="export_button" @click="handleExportData">
                     <p>导出数据</p>
                   </button>
                 </div>
@@ -269,8 +266,9 @@ import { useUpdate } from './function/useUpdate'
 import { GITHUB_REPO, PRIVACY_POLICY_FILE, DISCLAIMER_FILE, OFFICIAL_WEBSITE } from './const'
 import { useLog } from './function/useLog'
 import { useVersion } from './function/useVersion'
+import { exportDataToZip } from './function/exportUtils'
 const { version } = useVersion()
-const { logDir, changeDir, resetDir } = useLog()
+const { logDir } = useLog()
 const { checking, hasNew, newVer, checkUpdate } = useUpdate()
 const { toggleTheme, theme, followSystem, toggleFollowSystem } = useTheme()
 const { enabled, locationText, toggleLocation } = useLocation()
@@ -368,6 +366,20 @@ const openDisclaimer = async () => {
 // 打开官方网站
 const openOfficialWebsite = () => {
   window.open(OFFICIAL_WEBSITE, '_blank')
+}
+// 导出数据
+const handleExportData = async () => {
+  try {
+    // 获取所有JSON文件数据
+    const jsonData = await window.electronAPI.getAllJsonFiles()
+
+    // 导出数据为ZIP压缩包
+    await exportDataToZip(jsonData)
+    alert('数据导出成功！')
+  } catch (error) {
+    console.error('导出数据失败:', error)
+    alert('导出数据失败，请重试！')
+  }
 }
 </script>
 
