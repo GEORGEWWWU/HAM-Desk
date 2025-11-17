@@ -17,6 +17,8 @@
           <p>QSO数量：<span>{{ logs.length }}</span></p>
           <span>|</span>
           <p>默认日志本</p>
+          <span>|</span>
+          <p class="exportCSV" @click="handleExportData">导出CSV</p>
         </div>
       </div>
     </div>
@@ -274,8 +276,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useTheme } from '../function/useTheme'
 import { useLog } from '../function/useLog'
 const theme = useTheme()
-// 修正：在setup顶级作用域中调用一次useLog，而不是在事件处理函数中重复调用
-const { logs, save, deleteLogEntry } = useLog()
+const { logs, save, deleteLogEntry, exportToCsv } = useLog()
 
 // 输入框聚焦状态
 const isInputFocused = ref(false)
@@ -849,7 +850,22 @@ const handleQslReceivedDateChange = (event: Event) => {
   }
 }
 
-// 保存QSO记录
+// 导出CSV功能
+const handleExportData = async () => {
+  try {
+    const result = await exportToCsv()
+    if (!result.success) {
+      console.error('导出失败:', result.error)
+      // 可以在这里添加用户提示，例如使用ElMessage
+    } else {
+      console.log('导出成功:', result.fileName)
+      // 可以在这里添加成功提示
+    }
+  } catch (error) {
+    console.error('导出CSV时出错:', error)
+    // 可以在这里添加错误提示
+  }
+}
 const saveQSO = () => {
   // 获取日期和时间输入框的值
   const dateValue = dateInput.value?.value || ''

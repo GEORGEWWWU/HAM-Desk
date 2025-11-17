@@ -1,6 +1,8 @@
 // function/useLog.ts
 
 import { ref } from 'vue'
+import Papa from 'papaparse'
+import { saveAs } from 'file-saver'
 
 // 日志条目类型
 export interface LogEntry {
@@ -213,6 +215,86 @@ export function useLog() {
     }
   }
 
+  // 导出日志为CSV
+  async function exportToCsv() {
+    try {
+      // 调用主进程API获取日志数据
+      const result = await window.electronAPI.logExportToCsv() as unknown as { success: boolean; error?: string; data?: any[] }
+      
+      if (!result.success) {
+        console.error('导出失败:', result.error)
+        return { success: false, error: result.error }
+      }
+      
+      // 获取日志数据
+      const logData = result.data
+      
+      // 检查是否有数据
+      if (!logData || logData.length === 0) {
+        console.warn('没有日志数据可导出')
+        return { success: false, error: '没有日志数据可导出' }
+      }
+      
+      // 转换数据为CSV格式，使用实际数据字段
+      const csvData = logData.map((log: any) => {
+        // 分割datetime为date和time
+        let date = ''
+        let time = ''
+        if (log.datetime) {
+          const parts = log.datetime.split(' ')
+          date = parts[0] || ''
+          time = parts[1] || ''
+        }
+        
+        // 分割qsl为qsl_sent和qsl_received
+        let qsl_sent = '未发送'
+        let qsl_received = '未接收'
+        if (log.qsl) {
+          const qslParts = log.qsl.split('/')
+          qsl_sent = qslParts[0] || '未发送'
+          qsl_received = qslParts[1] || '未接收'
+        }
+        
+        return {
+          '日期': date,
+          '时间': time,
+          '呼号': log.call || '',
+          '模式': log.mode || '',
+          '频率(MHz)': log.freq || '',
+          '发送信号报告': log.rstS || '',
+          '接收信号报告': log.rstR || '',
+          '功率(W)': log.power || '',
+          '通联内容': log.message || '',
+          'QSL发送状态': qsl_sent,
+          'QSL接收状态': qsl_received,
+          'QSL卡片QTH': log.qth || ''
+        }
+      })
+      
+      // 使用Papa Parse转换为CSV
+      const csv = Papa.unparse(csvData, {
+        quotes: true, // 所有字段都加引号
+        delimiter: ',', // 使用逗号作为分隔符
+        header: true // 包含标题行
+      })
+      
+      // 生成文件名（包含时间戳）
+      const now = new Date()
+      const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`
+      const fileName = `ham_log_${timestamp}.csv`
+      
+      // 使用file-saver保存文件
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }) // 添加BOM以支持中文
+      saveAs(blob, fileName)
+      
+      console.log('CSV导出成功:', fileName)
+      return { success: true, fileName }
+    } catch (error) {
+      console.error('导出CSV时出错:', error)
+      return { success: false, error: '导出CSV时出错' }
+    }
+  }
+
   // 首次加载
   load()
 
@@ -221,6 +303,7 @@ export function useLog() {
     logs,
     save,
     deleteLogEntry,
+    exportToCsv,
     isSaving,
     error
   }

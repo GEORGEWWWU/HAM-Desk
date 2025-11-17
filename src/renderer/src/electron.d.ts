@@ -47,6 +47,8 @@ declare global {
       openHamMaps: () => Promise<void>
       // 获取所有JSON文件数据
       getAllJsonFiles: () => Promise<{ [fileName: string]: any }>
+      // 导出日志为CSV文件
+      logExportToCsv: () => Promise<void>
     }
   }
 }

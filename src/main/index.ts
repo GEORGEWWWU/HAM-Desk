@@ -612,6 +612,30 @@ ipcMain.handle('data:getAllJsonFiles', async () => {
   }
 })
 
+// 导出日志数据为CSV
+ipcMain.handle('log:exportToCsv', async () => {
+  try {
+    const dir = (global as any).logDir || DEFAULT_DIR
+    await ensureDirAsync(dir) // 确保目录存在
+    
+    // 读取日志文件
+    const logFilePath = join(dir, 'log.json')
+    const logContent = await fs.readFile(logFilePath, 'utf-8')
+    const logData = JSON.parse(logContent)
+    
+    // 检查是否有日志数据
+    if (!logData.logs || !Array.isArray(logData.logs) || logData.logs.length === 0) {
+      return { success: false, error: '没有日志数据可导出' }
+    }
+    
+    // 返回日志数据，由渲染进程处理CSV转换
+    return { success: true, data: logData.logs }
+  } catch (error) {
+    console.error('Failed to export log to CSV:', error)
+    return { success: false, error: '导出日志失败' }
+  }
+})
+
 // 注册给渲染进程用的版本号通道
 ipcMain.handle('app:getVersion', async () => {
   const pkg = join(app.getAppPath(), 'package.json')

@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   logRead: () => ipcRenderer.invoke('log:read'),
   logWrite: (d: any) => ipcRenderer.invoke('log:write', d),
   logOpenDir: () => ipcRenderer.invoke('log:openDir'),
+  logExportToCsv: (): Promise<{ success: boolean; error?: string; data?: any[] }> => ipcRenderer.invoke('log:exportToCsv'),
   // 应用版本相关
   getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
   // 文件操作相关
