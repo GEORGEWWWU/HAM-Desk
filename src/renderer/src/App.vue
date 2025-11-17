@@ -279,7 +279,7 @@ async function openLogDir() {
 }
 // 打开Github仓库地址
 function openGithub() {
-  window.open(GITHUB_REPO, '_blank')
+  window.open(`https://github.com/${GITHUB_REPO}`, '_blank')
 }
 // 导入所有图标
 const icons = {
@@ -307,17 +307,29 @@ const toggleSettings = () => {
 }
 // 检查更新按钮点击事件
 async function handleCheckUpdate() {
-  await checkUpdate()
-  // 统一弹窗
-  if (checking.value) return // 还在获取，不弹
-  if (hasNew.value) {
-    // 发现新版本
-    const ok = confirm(`发现新版本：Version ${newVer.value}\n点击“确定”前往下载页面。`)
-    if (ok) window.open(`https://github.com/${GITHUB_REPO}/releases/tag/${newVer.value}`)
-  } else if (newVer.value === '') {
-    alert('网络异常')
-  } else {
-    alert('当前已是最新版本！')
+  try {
+    await checkUpdate()
+    // 统一弹窗
+    if (checking.value) return // 还在获取，不弹
+    if (hasNew.value) {
+      // 发现新版本
+      const ok = confirm(`发现新版本：Version ${newVer.value}\n点击"确定"前往下载页面。`)
+      if (ok) window.open(`https://github.com/${GITHUB_REPO}/releases/tag/${newVer.value}`)
+    } else {
+      alert('当前已是最新版本！')
+    }
+  } catch (error) {
+    console.error('检查更新失败:', error)
+    // 根据错误类型显示不同的提示
+    const errorMessage = error instanceof Error ? error.message : '未知错误'
+    
+    if (errorMessage.includes('仓库不存在') || errorMessage.includes('404')) {
+      alert('未找到GitHub仓库或发布版本，请检查仓库地址是否正确。')
+    } else if (errorMessage.includes('API访问受限') || errorMessage.includes('403')) {
+      alert('GitHub API访问受限，请稍后再试或检查网络连接。')
+    } else {
+      alert(`检查更新失败: ${errorMessage}`)
+    }
   }
 }
 // 根据当前主题动态获取图标路径
