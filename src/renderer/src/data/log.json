@@ -1,6 +1,19 @@
 {
   "logs": [
     {
+      "id": "mi37jm9005i3y80cgrtq",
+      "datetime": "2025-11-17 21:56",
+      "call": "TEST",
+      "freq": "420.000",
+      "mode": "FM",
+      "rstS": "59",
+      "rstR": "59",
+      "power": "5",
+      "qth": "test",
+      "message": "",
+      "qsl": "未发送/未接收"
+    },
+    {
       "id": "mi2sy4hpa01pg9rfa3f",
       "datetime": "2025-11-17 15:07",
       "call": "BA8AYY",
@@ -41,7 +54,7 @@
     }
   ],
   "statistics": {
-    "totalContacts": 3,
-    "lastContact": "2025-11-13 19:06"
+    "totalContacts": 4,
+    "lastContact": "2025-11-17 21:56"
   }
 }

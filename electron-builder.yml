@@ -13,6 +13,11 @@ files:
 asarUnpack:
   - resources/**
   - src/renderer/src/assets/**
+extraResources:
+  - from: src/renderer/src/assets
+    to: assets
+    filter:
+      - "**/*"
 win:
   executableName: HAMDesk
   requestedExecutionLevel: asInvoker

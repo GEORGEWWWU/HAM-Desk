@@ -708,9 +708,10 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
     const baseName = fileName.substring(0, fileName.lastIndexOf('.'))
     const extension = fileName.substring(fileName.lastIndexOf('.'))
 
+    // 根据electron-builder的配置，资源文件会被复制到process.resourcesPath下的assets目录
     const possiblePaths = [
-      join(process.resourcesPath, 'assets', fileName),
-      join(process.resourcesPath, 'app.asar.unpacked', 'renderer', 'assets', fileName),
+      join(process.resourcesPath, 'assets', fileName), // 首选路径：extraResources配置的路径
+      join(process.resourcesPath, 'app.asar.unpacked', 'renderer', 'assets', fileName), // asarUnpack配置的路径
       join(app.getAppPath(), '..', 'app.asar.unpacked', 'renderer', 'assets', fileName),
       join(app.getAppPath(), 'resources', 'assets', fileName),
       join(app.getAppPath(), 'out', 'renderer', 'assets', fileName)
@@ -741,7 +742,7 @@ ipcMain.handle('copy-asset-file', async (_, fileName: string, destPath: string) 
 
       // 检查每个可能的目录
       const possibleDirs = [
-        join(process.resourcesPath, 'assets'),
+        join(process.resourcesPath, 'assets'), // 首选目录
         join(process.resourcesPath, 'app.asar.unpacked', 'renderer', 'assets'),
         join(app.getAppPath(), '..', 'app.asar.unpacked', 'renderer', 'assets'),
         join(app.getAppPath(), 'resources', 'assets'),

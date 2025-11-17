@@ -1,10 +1,26 @@
 // function/useDownImage.ts
 export async function downloadImage(src: string, filename?: string): Promise<void> {
   try {
-    // 如果是相对路径，通过主进程获取图片数据
+    // 处理资源文件路径（支持开发和生产环境）
+    let fileName: string | null = null
+    let isAssetFile = false
+    
+    // 检查是否为资源文件（支持多种路径格式）
     if (src.startsWith('../assets/')) {
-      const fileName = src.replace('../assets/', '')
-      
+      fileName = src.replace('../assets/', '')
+      isAssetFile = true
+    } else if (src.startsWith('./assets/')) {
+      fileName = src.replace('./assets/', '')
+      isAssetFile = true
+    } else if (src.startsWith('assets/')) {
+      fileName = src.replace('assets/', '')
+      isAssetFile = true
+    } else if (src.startsWith('/assets/')) {
+      fileName = src.replace('/assets/', '')
+      isAssetFile = true
+    }
+    
+    if (isAssetFile && fileName) {
       // 显示保存对话框
       const result = await window.electronAPI.showSaveDialog({
         defaultPath: filename || fileName,
