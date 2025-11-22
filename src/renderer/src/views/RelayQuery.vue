@@ -137,6 +137,24 @@
             </div>
           </div>
         </div>
+        <div class="relayCard">
+          <div class="relayName">
+            <span>模拟</span>
+            <h1>中继名称</h1>
+          </div>
+          <div class="relayFreq">
+            <div class="frep_item">
+              <p>接收 <span>000.000</span></p>
+              <p>/</p>
+              <p>发射 <span>000.000</span></p>
+            </div>
+            <div class="frep_item">
+              <p>差频 <span>0</span></p>
+              <p>/</p>
+              <p>亚音 <span>TSQ88.5</span></p>
+            </div>
+          </div>
+        </div>
       </div>
       <!--中继翻页胶囊-->
       <div class="relayList_page">
@@ -146,6 +164,13 @@
     </div>
 
     <!--全部中继-->
+    <div class="relay_all">
+      <img src="../assets/relay_all_back.png">
+      <div class="relayAll_title">
+        <h1><button>查看</button> 全国中继列表</h1>
+        <p>由 <span>BD8FTD</span> 维护更新数据</p>
+      </div>
+    </div>
   </div>
 </template>
 

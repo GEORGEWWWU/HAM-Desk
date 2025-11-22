@@ -9,6 +9,7 @@
   align-content: flex-start;
   animation: fadein 0.3s ease-in-out;
 
+  // 中继索引
   .relay_index {
     width: 97.5%;
     display: flex;
@@ -244,7 +245,7 @@
       }
     }
 
-    .relayList_page{
+    .relayList_page {
       width: 97%;
       display: flex;
       flex-direction: row;
@@ -253,7 +254,7 @@
       gap: 13px;
       margin-top: 13px;
 
-      .pageitem{
+      .pageitem {
         width: 28px;
         height: 4px;
         border-radius: 2vh;
@@ -262,9 +263,73 @@
         transition: all 0.12s ease-in-out;
       }
 
-      .pageActive{
+      .pageActive {
         opacity: 0.8;
         background: var(--primary-color-light);
+      }
+    }
+  }
+
+  // 全国中继列表
+  .relay_all {
+    width: 97.5%;
+    border-radius: 6px;
+    background: var(--system-item-bg-color);
+    display: grid;
+    justify-items: left;
+    align-items: center;
+    margin-top: 13px;
+
+    img{
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .relayAll_title{
+      position: absolute;
+      margin-left: 50px;
+      display: grid;
+      justify-items: left;
+      align-items: center;
+      gap: 8px;
+
+      h1{
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--checkversion-text-color);
+        opacity: 0.9;
+
+        button{
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 17px;
+          font-weight: bold;
+          cursor: pointer;
+          color: var(--primary-color);
+          background: var(--system-item-button-bg-color);
+          transition: all 0.12s ease-in-out;
+          opacity: 0.7;
+
+          &:hover{
+            opacity: 1;
+          }
+
+          &:active{
+            transform: scale(0.97);
+          }
+        }
+      }
+
+      p{
+        font-size: 12px;
+        font-weight: normal;
+        color: var(--system-item-button-bg-color);
+
+        span{
+          font-size: 12px;
+          font-weight: bold;
+        }
       }
     }
   }
