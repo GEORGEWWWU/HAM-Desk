@@ -53,7 +53,7 @@
                 <td>{{ currentPageData[i - 1].rstS }}</td>
                 <td>{{ currentPageData[i - 1].rstR }}</td>
                 <td>{{ currentPageData[i - 1].power }}</td>
-                <td style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{
+                <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{
                   currentPageData[i - 1].qth }}</td>
                 <td>{{ currentPageData[i - 1].qsl }}</td>
               </tr>

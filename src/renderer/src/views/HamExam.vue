@@ -1,7 +1,13 @@
 <template>
-  <div class="app"></div>
+  <div class="exam_app"></div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useTheme } from '../function/useTheme'
+const theme = useTheme()
+</script>
 
-<style scoped></style>
+<style scoped lang="less">
+@import '../style/mixins.less';
+@import '../style/hamexam.less';
+</style>
