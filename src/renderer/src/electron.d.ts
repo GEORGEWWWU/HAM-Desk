@@ -49,6 +49,9 @@ declare global {
       getAllJsonFiles: () => Promise<{ [fileName: string]: any }>
       // 导出日志为CSV文件
       logExportToCsv: () => Promise<void>
+      // 导出中继数据为Excel文件
+      getAppPath: () => Promise<string>
+      readRelayExcel: (fileName: string) => Promise<{ success: boolean; data?: any[]; error?: string }>
     }
   }
 }

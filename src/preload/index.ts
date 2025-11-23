@@ -57,7 +57,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // HAM地图相关
   openHamMaps: () => ipcRenderer.invoke('open-ham-maps'),
   // 数据导出相关
-  getAllJsonFiles: () => ipcRenderer.invoke('data:getAllJsonFiles')
+  getAllJsonFiles: () => ipcRenderer.invoke('data:getAllJsonFiles'),
+  // 获取应用路径
+  getAppPath: () => ipcRenderer.invoke('get-app-path'),
+  // 读取中继台Excel数据
+  readRelayExcel: () => ipcRenderer.invoke('read-relay-excel')
 })
 
 // 监听系统主题变化事件

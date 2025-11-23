@@ -7,6 +7,7 @@ import icon from '../../resources/icon.png?asset'
 import { promises as fs } from 'fs'
 import * as https from 'https'
 import { writeFile } from 'fs/promises'
+import * as XLSX from 'xlsx'
 
 // 调用签名数据文件路径
 const isDev = process.env.NODE_ENV === 'development'
@@ -586,13 +587,13 @@ ipcMain.handle('data:getAllJsonFiles', async () => {
   try {
     const dir = (global as any).logDir || DEFAULT_DIR
     await ensureDirAsync(dir) // 确保目录存在
-    
+
     // 读取目录中的所有文件
     const files = await fs.readdir(dir)
-    
+
     // 过滤出JSON文件
     const jsonFiles = files.filter(file => file.endsWith('.json'))
-    
+
     // 读取每个JSON文件的内容
     const jsonData = {}
     for (const file of jsonFiles) {
@@ -604,7 +605,7 @@ ipcMain.handle('data:getAllJsonFiles', async () => {
         console.error(`Failed to read file ${file}:`, error)
       }
     }
-    
+
     return jsonData
   } catch (error) {
     console.error('Failed to get JSON files:', error)
@@ -617,17 +618,17 @@ ipcMain.handle('log:exportToCsv', async () => {
   try {
     const dir = (global as any).logDir || DEFAULT_DIR
     await ensureDirAsync(dir) // 确保目录存在
-    
+
     // 读取日志文件
     const logFilePath = join(dir, 'log.json')
     const logContent = await fs.readFile(logFilePath, 'utf-8')
     const logData = JSON.parse(logContent)
-    
+
     // 检查是否有日志数据
     if (!logData.logs || !Array.isArray(logData.logs) || logData.logs.length === 0) {
       return { success: false, error: '没有日志数据可导出' }
     }
-    
+
     // 返回日志数据，由渲染进程处理CSV转换
     return { success: true, data: logData.logs }
   } catch (error) {
@@ -890,6 +891,46 @@ ipcMain.handle('get-ham-rss', async () => {
       res.on('end', () => resolve(body))
     }).on('error', reject)
   }) // 异步获取 RSS 内容（后续维护需更换订阅地址则修改这里）
+})
+
+// 获取应用路径
+ipcMain.handle('get-app-path', () => {
+  return app.getAppPath()
+})
+
+// 读取中继台Excel数据
+ipcMain.handle('read-relay-excel', async () => {
+  try {
+    // 确定Excel文件路径
+    const excelFilePath = isDev
+      ? join(app.getAppPath(), 'src', 'renderer', 'src', 'data', '全国UV段模拟中继（BD8FTD维护）.xlsx')
+      : join(app.getAppPath(), 'data', '全国UV段模拟中继（BD8FTD维护）.xlsx')
+
+    // 检查文件是否存在
+    try {
+      await fs.access(excelFilePath)
+    } catch (error) {
+      console.error('Excel文件不存在:', excelFilePath)
+      return { success: false, error: 'Excel文件不存在', data: [] }
+    }
+
+    // 读取Excel文件
+    const fileBuffer = await fs.readFile(excelFilePath)
+    const workbook = XLSX.read(fileBuffer, { type: 'buffer' })
+    
+    // 获取第一个工作表
+    const firstSheetName = workbook.SheetNames[0]
+    const worksheet = workbook.Sheets[firstSheetName]
+    
+    // 将工作表转换为JSON数据
+    const jsonData = XLSX.utils.sheet_to_json(worksheet)
+    
+    console.log('成功读取Excel文件，数据条数:', jsonData.length)
+    return { success: true, data: jsonData }
+  } catch (error) {
+    console.error('读取Excel文件失败:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error), data: [] }
+  }
 })
 
 

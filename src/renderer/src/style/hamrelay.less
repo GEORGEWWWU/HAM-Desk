@@ -9,6 +9,10 @@
   align-content: flex-start;
   animation: fadein 0.3s ease-in-out;
 
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
   // 中继索引
   .relay_index {
     width: 97.5%;
@@ -146,20 +150,24 @@
   // 中继列表
   .relay_list {
     width: 97.5%;
+    height: 53vh;
     border-radius: 0 6px 6px 6px;
     background: var(--system-item-bg-color);
     padding: 8px 0;
     display: grid;
     justify-items: center;
-    align-items: center;
+    align-content: space-between;
 
     .relayList {
       width: 97%;
+      max-height: 400px;
+      overflow-y: auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       justify-items: center;
       align-content: flex-start;
       gap: 13px;
+      padding: 5px;
 
       // 中继卡片
       .relayCard {
@@ -169,11 +177,11 @@
         display: grid;
         justify-items: center;
         align-content: flex-start;
-        border: solid 1px var(--system-item-bg-color);
+        border: solid 1px var(--system-item-button-bg-color);
         transition: all 0.12s ease-in-out;
 
         &:hover {
-          border: solid 1px var(--system-item-button-bg-color);
+          background: var(--system-item-button-bg-color);
         }
 
         .relayName {
@@ -213,10 +221,6 @@
           opacity: 0.78;
           transition: all 0.12s ease-in-out;
 
-          &:hover {
-            opacity: 1;
-          }
-
           .frep_item {
             width: 99%;
             display: flex;
@@ -243,29 +247,116 @@
           }
         }
       }
-    }
 
-    .relayList_page {
-      width: 97%;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      gap: 13px;
-      margin-top: 13px;
+      // 加载动画
+      .loading {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(40%, -300%);
+        opacity: 0.9;
 
-      .pageitem {
-        width: 28px;
-        height: 4px;
-        border-radius: 2vh;
-        background: var(--system-item-button-bg-color);
-        cursor: pointer;
-        transition: all 0.12s ease-in-out;
+        img {
+          width: 32px;
+          height: 32px;
+
+          animation: loading_rotate 1s ease-in-out infinite;
+
+          @keyframes loading_rotate {
+            0% {
+              transform: rotate(0deg);
+            }
+
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        }
       }
 
-      .pageActive {
-        opacity: 0.8;
-        background: var(--primary-color-light);
+      // 无数据提示
+      .no-data {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-40%, -500%);
+        opacity: 0.5;
+
+        p {
+          font-size: 14px;
+          color: var(--text-color);
+        }
+      }
+    }
+
+    /* 移除分页器样式，改为滚动显示 */
+  }
+
+  // 中继数据
+  .relay_data {
+    width: 97.5%;
+    height: 5vh;
+    border-radius: 6px;
+    background: var(--system-item-bg-color);
+    padding: 10px 0;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    margin-top: 13px;
+
+    .relayData {
+      width: 95%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+
+      .relaydata {
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: center;
+        gap: 13px;
+
+        p {
+          font-size: 13px;
+          // font-weight: bold;
+          color: var(--text-color);
+          opacity: 0.78;
+        }
+
+        span {
+          font-size: 13px;
+          color: var(--text-color);
+          opacity: 0.15;
+          transform: translateY(0.5px);
+        }
+      }
+
+      button {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        opacity: 0.78;
+        gap: 5px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        transition: all 0.12s ease-in-out;
+
+        &:hover {
+          opacity: 1;
+          background: var(--system-item-button-bg-color);
+        }
+
+        &:active {
+          transform: scale(0.98);
+        }
+
+        p {
+          font-size: 13px;
+          color: var(--text-color);
+        }
       }
     }
   }
@@ -280,13 +371,13 @@
     align-items: center;
     margin-top: 13px;
 
-    img{
+    img {
       width: 100%;
       height: auto;
       border-radius: 6px;
     }
 
-    .relayAll_title{
+    .relayAll_title {
       position: absolute;
       margin-left: 50px;
       display: grid;
@@ -294,13 +385,13 @@
       align-items: center;
       gap: 8px;
 
-      h1{
+      h1 {
         font-size: 20px;
         font-weight: bold;
-        color: var(--checkversion-text-color);
+        color: var(--map-titletext-color);
         opacity: 0.9;
 
-        button{
+        button {
           padding: 2px 6px;
           border-radius: 4px;
           font-size: 17px;
@@ -311,22 +402,23 @@
           transition: all 0.12s ease-in-out;
           opacity: 0.7;
 
-          &:hover{
+          &:hover {
             opacity: 1;
           }
 
-          &:active{
+          &:active {
             transform: scale(0.97);
           }
         }
       }
 
-      p{
+      p {
         font-size: 12px;
         font-weight: normal;
-        color: var(--system-item-button-bg-color);
+        color: var(--map-titletext-color);
+        opacity: 0.6;
 
-        span{
+        span {
           font-size: 12px;
           font-weight: bold;
         }

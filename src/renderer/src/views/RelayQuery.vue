@@ -29,137 +29,55 @@
       <!--中继列表-->
       <div class="relayList">
         <!--中继台卡片-->
-        <div class="relayCard">
+        <div 
+          class="relayCard" 
+          v-for="relay in currentCityRelays" 
+          :key="relay.name"
+        >
           <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
+            <span>{{ relay.mode }}</span>
+            <h1>{{ relay.name }}</h1>
           </div>
           <div class="relayFreq">
             <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
+              <p>接收 <span>{{ relay.receiveFreq }}</span></p>
               <p>/</p>
-              <p>发射 <span>000.000</span></p>
+              <p>发射 <span>{{ relay.transmitFreq }}</span></p>
             </div>
             <div class="frep_item">
-              <p>差频 <span>0</span></p>
+              <p>差频 <span>{{ relay.offset }}</span></p>
               <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
+              <p>亚音 <span>{{ relay.tone }}</span></p>
             </div>
           </div>
         </div>
-        <div class="relayCard">
-          <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
-          </div>
-          <div class="relayFreq">
-            <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
-              <p>/</p>
-              <p>发射 <span>000.000</span></p>
-            </div>
-            <div class="frep_item">
-              <p>差频 <span>0</span></p>
-              <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
-            </div>
-          </div>
+        <!--加载动画-->
+        <div class="loading" v-if="loading">
+          <img :src="getIconPath('loading')">
         </div>
-        <div class="relayCard">
-          <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
-          </div>
-          <div class="relayFreq">
-            <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
-              <p>/</p>
-              <p>发射 <span>000.000</span></p>
-            </div>
-            <div class="frep_item">
-              <p>差频 <span>0</span></p>
-              <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
-            </div>
-          </div>
+        <!--无数据提示-->
+        <div class="no-data" v-if="!loading && currentCityRelays.length === 0 && locationCity !== '***'">
+          <p>当前城市暂无中继台数据</p>
         </div>
-        <div class="relayCard">
-          <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
-          </div>
-          <div class="relayFreq">
-            <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
-              <p>/</p>
-              <p>发射 <span>000.000</span></p>
-            </div>
-            <div class="frep_item">
-              <p>差频 <span>0</span></p>
-              <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
-            </div>
-          </div>
-        </div>
-        <div class="relayCard">
-          <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
-          </div>
-          <div class="relayFreq">
-            <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
-              <p>/</p>
-              <p>发射 <span>000.000</span></p>
-            </div>
-            <div class="frep_item">
-              <p>差频 <span>0</span></p>
-              <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
-            </div>
-          </div>
-        </div>
-        <div class="relayCard">
-          <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
-          </div>
-          <div class="relayFreq">
-            <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
-              <p>/</p>
-              <p>发射 <span>000.000</span></p>
-            </div>
-            <div class="frep_item">
-              <p>差频 <span>0</span></p>
-              <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
-            </div>
-          </div>
-        </div>
-        <div class="relayCard">
-          <div class="relayName">
-            <span>模拟</span>
-            <h1>中继名称</h1>
-          </div>
-          <div class="relayFreq">
-            <div class="frep_item">
-              <p>接收 <span>000.000</span></p>
-              <p>/</p>
-              <p>发射 <span>000.000</span></p>
-            </div>
-            <div class="frep_item">
-              <p>差频 <span>0</span></p>
-              <p>/</p>
-              <p>亚音 <span>TSQ88.5</span></p>
-            </div>
-          </div>
+        <!--未定位提示-->
+        <div class="no-data" v-if="!loading && locationCity === '***'">
+          <p>请开启定位服务以查看中继台数据</p>
         </div>
       </div>
-      <!--中继翻页胶囊-->
-      <div class="relayList_page">
-        <div class="pageitem pageActive"></div>
-        <div class="pageitem"></div>
+      <!-- 移除分页器，改为滚动显示 -->
+    </div>
+
+    <!--中继数据-->
+    <div class="relay_data">
+      <div class="relayData">
+        <div class="relaydata">
+          <p>共 {{ currentCityRelays.length }} 个中继台</p>
+          <span>|</span>
+          <p>数据获取日期：{{ lastUpdateDate }}</p>
+        </div>
+        <button @click="reloadRelayData">
+          <p>重载数据</p>
+        </button>
       </div>
     </div>
 
@@ -178,8 +96,28 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useTheme } from '../function/useTheme'
 import { useLocation, on, off } from '../function/useLocation'
+import { useRelayData, type ParsedRelayData } from '../function/useRelayData'
+
 const theme = useTheme()
 const { enabled, locationText } = useLocation()
+const { 
+  loading, 
+  error, 
+  lastUpdateDate, 
+  loadRelayData, 
+  filterRelayByCity, 
+  reloadData 
+} = useRelayData()
+
+// 所有中继台数据
+const allRelayData = ref<ParsedRelayData[]>([])
+
+// 当前城市的中继台数据
+const currentCityRelays = ref<ParsedRelayData[]>([])
+
+// 分页相关
+const pageSize = 9
+const currentPage = ref(1)
 
 // 缓存键名
 const CACHE_KEY = 'relay_location_city'
@@ -189,6 +127,8 @@ const locationCity = ref('***')
 
 // 强制渲染组件的key，当定位状态变化时更新
 const renderKey = ref(0)
+
+// 移除分页功能，改为滚动显示
 
 // 从localStorage获取缓存的城市
 const getCachedCity = (): string => {
@@ -209,9 +149,9 @@ const saveCityToCache = (city: string): void => {
   }
 }
 
-// 解析定位文本，提取城市信息
+// 解析定位文本，提取城市名称
 const parseLocationText = (text: string): string => {
-  if (!text || text === '定位中…' || text === '未启用位置服务') {
+  if (!text || text === '未启用位置服务') {
     return '***'
   }
 
@@ -219,65 +159,15 @@ const parseLocationText = (text: string): string => {
   if (text.includes(',')) {
     const parts = text.split(',')
     if (parts.length >= 2) {
-      return parts[1].trim()
+      // 去掉城市名称中的"市"字
+      return parts[1].trim().replace(/市$/, '')
     } else {
-      return parts[0].trim()
+      return parts[0].trim().replace(/市$/, '')
     }
   } else {
-    return text.trim()
+    return text.trim().replace(/市$/, '')
   }
 }
-
-// 处理定位服务状态变化
-const handleLocationUpdate = (data: { enabled: boolean; text: string }) => {
-  console.log('定位服务状态更新:', data)
-
-  // 强制重新渲染组件
-  renderKey.value += 1
-
-  if (data.enabled && data.text) {
-    const newCity = parseLocationText(data.text)
-    const cachedCity = getCachedCity()
-
-    // 只有当新城市与缓存不同时才更新显示和缓存
-    if (newCity !== cachedCity) {
-      locationCity.value = newCity
-      saveCityToCache(newCity)
-    } else if (locationCity.value === '***') {
-      // 如果当前显示的是***，则使用缓存的城市
-      locationCity.value = cachedCity
-    }
-  } else {
-    locationCity.value = '***'
-  }
-}
-
-// 监听定位服务状态和定位文本变化
-watch([enabled, locationText], ([isEnabled, text]) => {
-  console.log('监听到定位状态变化:', isEnabled, text)
-  handleLocationUpdate({ enabled: isEnabled, text: text || '未启用位置服务' })
-}, { immediate: true }) // 添加immediate: true确保立即执行一次
-
-// 页面加载时，先从缓存获取城市
-onMounted(() => {
-  console.log('中继页面加载，当前定位状态:', enabled.value, locationText.value)
-
-  const cachedCity = getCachedCity()
-  if (cachedCity !== '***') {
-    locationCity.value = cachedCity
-  }
-
-  // 监听定位服务状态变化事件
-  on('location-updated', handleLocationUpdate)
-
-  // 立即检查一次定位状态
-  handleLocationUpdate({ enabled: enabled.value, text: locationText.value })
-})
-
-// 组件卸载时移除事件监听
-onUnmounted(() => {
-  off('location-updated', handleLocationUpdate)
-})
 
 // 导入所有图标
 const icons = {
@@ -285,12 +175,156 @@ const icons = {
   中继查询_white: new URL('../assets/中继查询_white.svg', import.meta.url).href,
   搜索: new URL('../assets/搜索.svg', import.meta.url).href,
   搜索_white: new URL('../assets/搜索_white.svg', import.meta.url).href,
+  loading: new URL('../assets/loading.svg', import.meta.url).href,
+  loading_white: new URL('../assets/loading_white.svg', import.meta.url).href,
 }
+
 // 根据当前主题动态获取图标路径
 const getIconPath = (iconName: string) => {
   const iconKey = theme.theme.value === 'dark' ? `${iconName}_white` : iconName
   return (icons as Record<string, string>)[iconKey]
 }
+
+// 加载中继台数据
+const loadRelayDataForCity = async (city: string) => {
+  if (!city || city === '***') {
+    currentCityRelays.value = []
+    return
+  }
+
+  try {
+    // 如果还没有加载过数据，先加载所有数据
+    if (allRelayData.value.length === 0) {
+      allRelayData.value = await loadRelayData()
+      
+      // 调试：输出所有城市列表和成都相关的中继
+      const allCities = [...new Set(allRelayData.value.map(item => item.city))].sort()
+      console.log('所有城市列表:', allCities)
+      
+      // 查找成都相关的中继
+      const chengduRelays = allRelayData.value.filter(item => 
+        item.city && item.city.includes('成都')
+      )
+      console.log('成都相关中继:', chengduRelays)
+      
+      // 输出前5条示例中继数据
+      console.log('前5条示例中继数据:', allRelayData.value.slice(0, 5))
+    }
+
+    // 根据城市筛选数据
+    const filteredData = filterRelayByCity(allRelayData.value, city)
+    currentCityRelays.value = filteredData
+
+    console.log(`为城市 ${city} 找到 ${filteredData.length} 个中继台`)
+    
+    // 如果找不到数据，检查城市匹配逻辑
+    if (filteredData.length === 0) {
+      console.log('城市匹配检查 - 所有数据:', allRelayData.value.map(item => item.city))
+      console.log('城市匹配检查 - 搜索城市:', city)
+      
+      // 尝试模糊匹配
+      const fuzzyMatch = allRelayData.value.filter(item => 
+        item.city && item.city.toLowerCase().includes(city.toLowerCase())
+      )
+      console.log('模糊匹配结果:', fuzzyMatch)
+    }
+  } catch (err) {
+    console.error('加载中继数据失败:', err)
+    currentCityRelays.value = []
+  }
+}
+
+// 重载数据
+const reloadRelayData = async () => {
+  try {
+    allRelayData.value = await reloadData()
+    
+    // 重新筛选当前城市的数据
+    if (locationCity.value && locationCity.value !== '***') {
+      const filteredData = filterRelayByCity(allRelayData.value, locationCity.value)
+      currentCityRelays.value = filteredData
+    }
+  } catch (err) {
+    console.error('重载数据失败:', err)
+  }
+}
+
+// 处理定位服务状态变化
+const handleLocationUpdate = async (data: { enabled: boolean; text: string }) => {
+  console.log('定位服务状态更新:', data)
+
+  // 强制重新渲染组件
+  renderKey.value += 1
+
+  if (data.enabled && data.text && data.text !== '定位中…') {
+    const newCity = parseLocationText(data.text)
+    const cachedCity = getCachedCity()
+
+    // 只有当新城市与缓存不同时才更新缓存
+    if (newCity !== cachedCity) {
+      saveCityToCache(newCity)
+    }
+
+    // 始终更新显示的城市
+    locationCity.value = newCity
+    
+    // 加载对应城市的中继台数据
+    await loadRelayDataForCity(newCity)
+  } else if (!data.enabled) {
+    // 定位服务关闭时显示***
+    locationCity.value = '***'
+    currentCityRelays.value = []
+  }
+  // 如果是定位中状态，保持当前显示不变
+}
+
+// 监听定位服务状态和定位文本变化
+watch([enabled, locationText], ([isEnabled, text]) => {
+  console.log('监听到定位状态变化:', isEnabled, text)
+  handleLocationUpdate({ enabled: isEnabled, text: text || '未启用位置服务' })
+}, { immediate: true })
+
+// 页面加载时，先从缓存获取城市
+onMounted(async () => {
+  console.log('中继页面加载，当前定位状态:', enabled.value, locationText.value)
+
+  // 强制加载所有中继数据，用于测试显示
+  try {
+    allRelayData.value = await loadRelayData()
+    
+    // 测试：显示所有中继台数据（滚动显示）
+    if (allRelayData.value.length > 0) {
+      locationCity.value = '测试数据'
+      currentCityRelays.value = allRelayData.value
+      
+      console.log('测试数据加载完成，总数据量:', allRelayData.value.length)
+    }
+  } catch (err) {
+    console.error('加载中继数据失败:', err)
+  }
+
+  const cachedCity = getCachedCity()
+  if (cachedCity !== '***') {
+    locationCity.value = cachedCity
+    // 加载对应城市的中继台数据
+    await loadRelayDataForCity(cachedCity)
+  }
+
+  // 监听定位服务状态变化事件
+  on('location-updated', handleLocationUpdate)
+
+  // 如果定位服务已启用且有定位文本，立即更新显示
+  if (enabled.value && locationText.value && locationText.value !== '定位中…') {
+    const newCity = parseLocationText(locationText.value)
+    locationCity.value = newCity
+    await loadRelayDataForCity(newCity)
+  }
+})
+
+// 组件卸载时移除事件监听
+onUnmounted(() => {
+  off('location-updated', handleLocationUpdate)
+})
 </script>
 
 <style scoped lang="less">
