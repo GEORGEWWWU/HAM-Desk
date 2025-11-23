@@ -29,11 +29,7 @@
       <!--中继列表-->
       <div class="relayList">
         <!--中继台卡片-->
-        <div 
-          class="relayCard" 
-          v-for="relay in currentCityRelays" 
-          :key="relay.name"
-        >
+        <div class="relayCard" v-for="relay in currentCityRelays" :key="relay.name">
           <div class="relayName">
             <span>{{ relay.mode }}</span>
             <h1>{{ relay.name }}</h1>
@@ -45,7 +41,7 @@
               <p>发射 <span>{{ relay.transmitFreq }}</span></p>
             </div>
             <div class="frep_item">
-              <p>差频 <span>{{ relay.offset }}</span></p>
+              <p>差频 <span>{{ calculateOffset(relay.receiveFreq, relay.transmitFreq) }}</span></p>
               <p>/</p>
               <p>亚音 <span>{{ relay.tone }}</span></p>
             </div>
@@ -100,13 +96,13 @@ import { useRelayData, type ParsedRelayData } from '../function/useRelayData'
 
 const theme = useTheme()
 const { enabled, locationText } = useLocation()
-const { 
-  loading, 
-  error, 
-  lastUpdateDate, 
-  loadRelayData, 
-  filterRelayByCity, 
-  reloadData 
+const {
+  loading,
+  error,
+  lastUpdateDate,
+  loadRelayData,
+  filterRelayByCity,
+  reloadData
 } = useRelayData()
 
 // 所有中继台数据
@@ -114,10 +110,6 @@ const allRelayData = ref<ParsedRelayData[]>([])
 
 // 当前城市的中继台数据
 const currentCityRelays = ref<ParsedRelayData[]>([])
-
-// 分页相关
-const pageSize = 9
-const currentPage = ref(1)
 
 // 缓存键名
 const CACHE_KEY = 'relay_location_city'
@@ -127,8 +119,6 @@ const locationCity = ref('***')
 
 // 强制渲染组件的key，当定位状态变化时更新
 const renderKey = ref(0)
-
-// 移除分页功能，改为滚动显示
 
 // 从localStorage获取缓存的城市
 const getCachedCity = (): string => {
@@ -196,19 +186,11 @@ const loadRelayDataForCity = async (city: string) => {
     // 如果还没有加载过数据，先加载所有数据
     if (allRelayData.value.length === 0) {
       allRelayData.value = await loadRelayData()
-      
-      // 调试：输出所有城市列表和成都相关的中继
-      const allCities = [...new Set(allRelayData.value.map(item => item.city))].sort()
-      console.log('所有城市列表:', allCities)
-      
+
       // 查找成都相关的中继
-      const chengduRelays = allRelayData.value.filter(item => 
+      const chengduRelays = allRelayData.value.filter(item =>
         item.city && item.city.includes('成都')
       )
-      console.log('成都相关中继:', chengduRelays)
-      
-      // 输出前5条示例中继数据
-      console.log('前5条示例中继数据:', allRelayData.value.slice(0, 5))
     }
 
     // 根据城市筛选数据
@@ -216,21 +198,33 @@ const loadRelayDataForCity = async (city: string) => {
     currentCityRelays.value = filteredData
 
     console.log(`为城市 ${city} 找到 ${filteredData.length} 个中继台`)
-    
-    // 如果找不到数据，检查城市匹配逻辑
-    if (filteredData.length === 0) {
-      console.log('城市匹配检查 - 所有数据:', allRelayData.value.map(item => item.city))
-      console.log('城市匹配检查 - 搜索城市:', city)
-      
-      // 尝试模糊匹配
-      const fuzzyMatch = allRelayData.value.filter(item => 
-        item.city && item.city.toLowerCase().includes(city.toLowerCase())
-      )
-      console.log('模糊匹配结果:', fuzzyMatch)
-    }
+
   } catch (err) {
     console.error('加载中继数据失败:', err)
     currentCityRelays.value = []
+  }
+}
+
+// 计算差频：发射频率 - 接收频率
+const calculateOffset = (receiveFreq: string, transmitFreq: string): string => {
+  try {
+    // 将频率字符串转换为数字（MHz）
+    const receive = parseFloat(receiveFreq)
+    const transmit = parseFloat(transmitFreq)
+
+    // 检查是否为有效数字
+    if (isNaN(receive) || isNaN(transmit)) {
+      return '0.000'
+    }
+
+    // 计算差频：发射 - 接收
+    const offset = transmit - receive
+
+    // 格式化输出，保留3位小数
+    return offset.toFixed(3)
+  } catch (error) {
+    console.error('计算差频失败:', error)
+    return '0.000'
   }
 }
 
@@ -238,7 +232,7 @@ const loadRelayDataForCity = async (city: string) => {
 const reloadRelayData = async () => {
   try {
     allRelayData.value = await reloadData()
-    
+
     // 重新筛选当前城市的数据
     if (locationCity.value && locationCity.value !== '***') {
       const filteredData = filterRelayByCity(allRelayData.value, locationCity.value)
@@ -267,7 +261,7 @@ const handleLocationUpdate = async (data: { enabled: boolean; text: string }) =>
 
     // 始终更新显示的城市
     locationCity.value = newCity
-    
+
     // 加载对应城市的中继台数据
     await loadRelayDataForCity(newCity)
   } else if (!data.enabled) {
@@ -288,21 +282,6 @@ watch([enabled, locationText], ([isEnabled, text]) => {
 onMounted(async () => {
   console.log('中继页面加载，当前定位状态:', enabled.value, locationText.value)
 
-  // 强制加载所有中继数据，用于测试显示
-  try {
-    allRelayData.value = await loadRelayData()
-    
-    // 测试：显示所有中继台数据（滚动显示）
-    if (allRelayData.value.length > 0) {
-      locationCity.value = '测试数据'
-      currentCityRelays.value = allRelayData.value
-      
-      console.log('测试数据加载完成，总数据量:', allRelayData.value.length)
-    }
-  } catch (err) {
-    console.error('加载中继数据失败:', err)
-  }
-
   const cachedCity = getCachedCity()
   if (cachedCity !== '***') {
     locationCity.value = cachedCity
@@ -319,6 +298,8 @@ onMounted(async () => {
     locationCity.value = newCity
     await loadRelayDataForCity(newCity)
   }
+
+  await reloadData();
 })
 
 // 组件卸载时移除事件监听

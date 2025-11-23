@@ -917,15 +917,14 @@ ipcMain.handle('read-relay-excel', async () => {
     // 读取Excel文件
     const fileBuffer = await fs.readFile(excelFilePath)
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' })
-    
+
     // 获取第一个工作表
     const firstSheetName = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[firstSheetName]
-    
+
     // 将工作表转换为JSON数据
     const jsonData = XLSX.utils.sheet_to_json(worksheet)
-    
-    console.log('成功读取Excel文件，数据条数:', jsonData.length)
+
     return { success: true, data: jsonData }
   } catch (error) {
     console.error('读取Excel文件失败:', error)

@@ -1,3 +1,4 @@
+// function/useRelayData.ts
 import { ref } from 'vue'
 
 // 中继台数据类型定义
@@ -8,6 +9,8 @@ export interface RelayData {
   接收频率: string
   发送频率: string
   频差: string
+  接收亚音?: string  // ✅ 新增
+  发射亚音?: string  // ✅ 新增
   模式: string
   省份: string
   城市: string
@@ -40,7 +43,7 @@ export const useRelayData = () => {
     try {
       const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY)
       if (!timestamp) return false
-      
+
       const cacheTime = parseInt(timestamp)
       return Date.now() - cacheTime < CACHE_DURATION
     } catch {
@@ -52,10 +55,10 @@ export const useRelayData = () => {
   const getCachedData = (): ParsedRelayData[] | null => {
     try {
       if (!isCacheValid()) return null
-      
+
       const cached = localStorage.getItem(CACHE_KEY)
       if (!cached) return null
-      
+
       return JSON.parse(cached)
     } catch {
       return null
@@ -74,31 +77,34 @@ export const useRelayData = () => {
 
   // 解析亚音显示格式
   const parseTone = (receiveTone: string, transmitTone: string): string => {
-    if (!receiveTone && !transmitTone) return ''
-    
+    if (!receiveTone && !transmitTone) return '';
+
     if (receiveTone && transmitTone) {
-      return `TSQ${transmitTone}`
+      return `TSQ${transmitTone}`;
     } else if (transmitTone) {
-      return `T${transmitTone}`
+      return `T${transmitTone}`;
     } else {
-      return `R${receiveTone}`
+      return `R${receiveTone}`;
     }
-  }
+  };
 
   // 解析Excel数据
   const parseExcelData = (data: RelayData[]): ParsedRelayData[] => {
-    return data.map(item => ({
-      mode: item.模式 || '模拟',
-      name: item.中继名称 || '',
-      receiveFreq: item.接收频率 ? item.接收频率.toString() : '',
-      transmitFreq: item.发送频率 ? item.发送频率.toString() : '',
-      offset: item.频差 ? item.频差.toString() : '',
-      tone: '', // 原始数据中没有亚音字段
-      city: item.城市 || ''
-    })).filter(item => 
-      item.name && item.receiveFreq && item.transmitFreq
-    )
-  }
+    return data.map(item => {
+      const receiveTone = String(item.接收亚音 ?? '').trim()
+      const transmitTone = String(item.发射亚音 ?? '').trim()
+
+      return {
+        mode: item.模式 || '模拟',
+        name: item.中继名称 || '',
+        receiveFreq: String(item.接收频率 ?? ''),
+        transmitFreq: String(item.发送频率 ?? ''),
+        offset: String(item.频差 ?? ''),
+        tone: parseTone(receiveTone, transmitTone),
+        city: item.城市 || ''
+      };
+    }).filter(item => item.name && item.receiveFreq && item.transmitFreq);
+  };
 
   // 读取Excel文件
   const loadRelayData = async (): Promise<ParsedRelayData[]> => {
@@ -113,7 +119,7 @@ export const useRelayData = () => {
         lastUpdateDate.value = new Date().toISOString().split('T')[0]
         return cachedData
       }
-      
+
       console.log('缓存无效或为空，重新加载Excel数据')
 
       // 通过主进程读取Excel文件
@@ -122,28 +128,28 @@ export const useRelayData = () => {
       }
 
       const excelData = await window.electronAPI.readRelayExcel('全国UV段模拟中继（BD8FTD维护）.xlsx')
-      
+
       if (!excelData || !excelData.success) {
         throw new Error(excelData?.error || '读取Excel文件失败')
       }
 
       // 直接使用返回的JSON数据，添加类型检查
       const jsonData: RelayData[] = excelData.data || []
-      
+
       if (!jsonData || jsonData.length === 0) {
         throw new Error('Excel文件中没有数据')
       }
 
       // 解析数据
       const parsedData = parseExcelData(jsonData)
-      
+
       // 保存到缓存
       saveToCache(parsedData)
       lastUpdateDate.value = new Date().toISOString().split('T')[0]
-      
+
       console.log(`成功加载 ${parsedData.length} 个中继台数据`)
       return parsedData
-      
+
     } catch (err) {
       error.value = err instanceof Error ? err.message : '未知错误'
       console.error('加载中继数据失败:', err)
@@ -156,14 +162,14 @@ export const useRelayData = () => {
   // 根据城市筛选中继台数据
   const filterRelayByCity = (data: ParsedRelayData[], city: string): ParsedRelayData[] => {
     if (!city || city === '***') return []
-    
+
     return data.filter(item => {
       if (!item.city) return false
-      
+
       // 多种匹配方式：
       // 1. 直接包含城市名
       if (item.city.includes(city)) return true
-      
+
       // 2. 如果城市字段包含逗号，检查城市部分
       if (item.city.includes(',')) {
         const parts = item.city.split(',')
@@ -172,10 +178,10 @@ export const useRelayData = () => {
           if (cityPart.includes(city)) return true
         }
       }
-      
+
       // 3. 不区分大小写匹配
       if (item.city.toLowerCase().includes(city.toLowerCase())) return true
-      
+
       return false
     })
   }
@@ -189,7 +195,7 @@ export const useRelayData = () => {
     } catch (error) {
       console.error('清除缓存失败:', error)
     }
-    
+
     return await loadRelayData()
   }
 
