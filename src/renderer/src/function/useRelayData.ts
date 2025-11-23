@@ -9,8 +9,8 @@ export interface RelayData {
   接收频率: string
   发送频率: string
   频差: string
-  接收亚音?: string  // ✅ 新增
-  发射亚音?: string  // ✅ 新增
+  接收亚音?: string
+  发射亚音?: string
   模式: string
   省份: string
   城市: string
@@ -27,53 +27,11 @@ export interface ParsedRelayData {
   city: string
 }
 
-// 缓存键名
-const CACHE_KEY = 'relay_data_cache'
-const CACHE_TIMESTAMP_KEY = 'relay_data_timestamp'
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24小时缓存
-
 // 读取Excel文件
 export const useRelayData = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const lastUpdateDate = ref<string>('')
-
-  // 检查缓存是否有效
-  const isCacheValid = (): boolean => {
-    try {
-      const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY)
-      if (!timestamp) return false
-
-      const cacheTime = parseInt(timestamp)
-      return Date.now() - cacheTime < CACHE_DURATION
-    } catch {
-      return false
-    }
-  }
-
-  // 从缓存获取数据
-  const getCachedData = (): ParsedRelayData[] | null => {
-    try {
-      if (!isCacheValid()) return null
-
-      const cached = localStorage.getItem(CACHE_KEY)
-      if (!cached) return null
-
-      return JSON.parse(cached)
-    } catch {
-      return null
-    }
-  }
-
-  // 保存数据到缓存
-  const saveToCache = (data: ParsedRelayData[]): void => {
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data))
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
-    } catch (error) {
-      console.error('保存缓存失败:', error)
-    }
-  }
 
   // 解析亚音显示格式
   const parseTone = (receiveTone: string, transmitTone: string): string => {
@@ -112,15 +70,6 @@ export const useRelayData = () => {
     error.value = null
 
     try {
-      // 先检查缓存
-      const cachedData = getCachedData()
-      if (cachedData && cachedData.length > 0) {
-        console.log('使用缓存的中继数据，缓存数据条数:', cachedData.length)
-        lastUpdateDate.value = new Date().toISOString().split('T')[0]
-        return cachedData
-      }
-
-      console.log('缓存无效或为空，重新加载Excel数据')
 
       // 通过主进程读取Excel文件
       if (!window.electronAPI || !window.electronAPI.readRelayExcel) {
@@ -142,12 +91,8 @@ export const useRelayData = () => {
 
       // 解析数据
       const parsedData = parseExcelData(jsonData)
-
-      // 保存到缓存
-      saveToCache(parsedData)
       lastUpdateDate.value = new Date().toISOString().split('T')[0]
 
-      console.log(`成功加载 ${parsedData.length} 个中继台数据`)
       return parsedData
 
     } catch (err) {
@@ -188,14 +133,7 @@ export const useRelayData = () => {
 
   // 手动重载数据
   const reloadData = async (): Promise<ParsedRelayData[]> => {
-    // 清除缓存
-    try {
-      localStorage.removeItem(CACHE_KEY)
-      localStorage.removeItem(CACHE_TIMESTAMP_KEY)
-    } catch (error) {
-      console.error('清除缓存失败:', error)
-    }
-
+    // 直接重新加载数据，无需清除缓存
     return await loadRelayData()
   }
 

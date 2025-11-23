@@ -202,12 +202,16 @@
 
           h1 {
             max-width: 190px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
-            color: var(--text-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--checkversion-text-color);
+            background: var(--checkversion-bg-color);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            opacity: 0.8;
           }
         }
 
@@ -216,9 +220,9 @@
           display: grid;
           justify-items: center;
           align-content: flex-start;
-          gap: 4px;
+          gap: 5px;
           margin-top: 8px;
-          opacity: 0.78;
+          opacity: 0.7;
           transition: all 0.12s ease-in-out;
 
           .frep_item {
@@ -230,8 +234,8 @@
             gap: 5px;
 
             p {
-              font-size: 13px;
-              font-weight: bold;
+              font-size: 12px;
+              font-weight: normal;
               color: var(--primary-color);
               display: flex;
               justify-content: left;
@@ -239,8 +243,8 @@
               gap: 8px;
 
               span {
-                font-size: 13px;
-                font-weight: normal;
+                font-size: 12px;
+                font-weight: bold;
                 color: var(--primary-color);
               }
             }
@@ -288,8 +292,6 @@
         }
       }
     }
-
-    /* 移除分页器样式，改为滚动显示 */
   }
 
   // 中继数据

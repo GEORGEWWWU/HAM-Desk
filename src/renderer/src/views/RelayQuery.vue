@@ -186,11 +186,6 @@ const loadRelayDataForCity = async (city: string) => {
     // 如果还没有加载过数据，先加载所有数据
     if (allRelayData.value.length === 0) {
       allRelayData.value = await loadRelayData()
-
-      // 查找成都相关的中继
-      const chengduRelays = allRelayData.value.filter(item =>
-        item.city && item.city.includes('成都')
-      )
     }
 
     // 根据城市筛选数据
