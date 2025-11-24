@@ -40,7 +40,7 @@
         <!--数据与日志-->
         <div class="data_log">
           <div class="dataCount">
-            <h1>0</h1>
+            <h1>{{ logs.length }}</h1>
             <div class="dataCount_text">
               <p>总计</p>
               <span>个 QSO</span>
@@ -112,9 +112,11 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useTheme } from '../function/useTheme'
 import { useDevice } from '../function/useDevice'
+import { useLog } from '../function/useLog'
 import DeviceManage from '../components/DeviceManage.vue'
 import { openHamMaps } from '../function/useHamMaps'
 const theme = useTheme()
+const { logs } = useLog()
 const showDeviceManage = ref(false)
 const { devices, loadDevices } = useDevice()
 // 导入所有图标
