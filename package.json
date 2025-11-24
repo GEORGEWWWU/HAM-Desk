@@ -1,6 +1,6 @@
 {
   "name": "ham-desk",
-  "version": "0.9.1",
+  "version": "0.9.5",
   "description": "HAM Desk",
   "main": "./out/main/index.js",
   "author": "GEORGEWU",

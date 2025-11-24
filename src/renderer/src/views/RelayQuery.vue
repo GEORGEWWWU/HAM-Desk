@@ -15,11 +15,20 @@
       </div>
       <!--中继查询-->
       <div class="relay_search">
+        <!--搜索框-->
         <div class="saerchbox">
-          <input type="text" placeholder="城市/频率/中继名称">
+          <input type="text" placeholder="城市名称" v-model="searchQuery" @input="handleSearchInput">
           <button>
             <img :src="getIconPath('搜索')">
           </button>
+        </div>
+        <!--搜索结果-->
+        <div class="searchResult" v-if="searchResults.length > 0">
+          <div class="result_item" v-for="city in searchResults" :key="city">
+            <button @click="selectCity(city)">
+              <p>{{ city }}</p>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -68,11 +77,16 @@
         <div class="relaydata">
           <p>共 {{ currentCityRelays.length }} 个中继台</p>
           <span>|</span>
-          <p>数据获取日期：{{ lastUpdateDate }}</p>
+          <p>本地数据日期：{{ lastUpdateDate }}</p>
         </div>
-        <button @click="reloadRelayData">
-          <p>重载数据</p>
-        </button>
+        <div class="relaybutton">
+          <button @click="restoreToLocatedCity" :disabled="!enabled">
+            <p>恢复至定位城市</p>
+          </button>
+          <button @click="reloadRelayData">
+            <p>重载数据</p>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -80,7 +94,7 @@
     <div class="relay_all">
       <img src="../assets/relay_all_back.png">
       <div class="relayAll_title">
-        <h1><button>查看</button> 全国中继列表</h1>
+        <h1><button @click="navigateToAllRelays">查看</button> 全国中继列表</h1>
         <p>由 <span>BD8FTD</span> 维护更新数据</p>
       </div>
     </div>
@@ -109,6 +123,15 @@ const allRelayData = ref<ParsedRelayData[]>([])
 // 当前城市的中继台数据
 const currentCityRelays = ref<ParsedRelayData[]>([])
 
+// 搜索查询字符串
+const searchQuery = ref('')
+
+// 搜索结果列表
+const searchResults = ref<string[]>([])
+
+// 所有城市列表（用于搜索）
+const allCities = ref<string[]>([])
+
 // 缓存键名
 const CACHE_KEY = 'relay_location_city'
 
@@ -117,6 +140,71 @@ const locationCity = ref('***')
 
 // 强制渲染组件的key，当定位状态变化时更新
 const renderKey = ref(0)
+
+// 导航到全部中继页面
+const navigateToAllRelays = () => {
+  window.open('https://www.kdocs.cn/l/civsNrKrVaTj', '_blank')
+}
+
+// 处理搜索输入
+const handleSearchInput = () => {
+  // 如果搜索框为空，清空搜索结果
+  if (!searchQuery.value.trim()) {
+    searchResults.value = []
+    return
+  }
+
+  // 执行模糊搜索
+  performFuzzySearch(searchQuery.value.trim())
+}
+
+// 执行城市名模糊搜索
+const performFuzzySearch = (query: string) => {
+  if (!query || allCities.value.length === 0) {
+    searchResults.value = []
+    return
+  }
+
+  // 将搜索词转为小写，以便不区分大小写匹配
+  const lowerQuery = query.toLowerCase()
+
+  // 过滤出包含搜索词的城市名
+  const results = allCities.value.filter(city =>
+    city.toLowerCase().includes(lowerQuery)
+  )
+
+  // 限制结果数量，避免显示太多
+  searchResults.value = results.slice(0, 10)
+}
+
+// 选择城市
+const selectCity = async (city: string) => {
+  // 更新定位城市
+  locationCity.value = city
+  saveCityToCache(city)
+
+  // 清空搜索框和搜索结果
+  searchQuery.value = ''
+  searchResults.value = []
+
+  // 加载选中城市的中继数据
+  await loadRelayDataForCity(city)
+}
+
+// 从所有中继数据中提取城市列表
+const extractCitiesFromRelayData = (relayData: ParsedRelayData[]) => {
+  // 使用 Set 去重
+  const cities = new Set<string>()
+
+  relayData.forEach(relay => {
+    if (relay.city) {
+      cities.add(relay.city)
+    }
+  })
+
+  // 转换为数组并排序
+  return Array.from(cities).sort()
+}
 
 // 从localStorage获取缓存的城市
 const getCachedCity = (): string => {
@@ -185,6 +273,8 @@ const loadRelayDataForCity = async (city: string) => {
     // 如果还没有加载过数据，先加载所有数据
     if (allRelayData.value.length === 0) {
       allRelayData.value = await loadRelayData()
+      // 提取所有城市列表
+      allCities.value = extractCitiesFromRelayData(allRelayData.value)
     }
 
     // 根据城市筛选数据
@@ -206,13 +296,13 @@ const formatFrequency = (freq: string): string => {
     if (freq.includes('.') && freq.split('.')[1].length === 4) {
       return freq
     }
-    
+
     // 转换为数字再格式化为4位小数
     const num = parseFloat(freq)
     if (isNaN(num)) {
       return freq
     }
-    
+
     return num.toFixed(4)
   } catch (error) {
     console.error('格式化频率失败:', error)
@@ -237,7 +327,7 @@ const calculateOffset = (receiveFreq: string, transmitFreq: string): string => {
 
     // 格式化输出，保留3位小数
     const formattedOffset = offset.toFixed(3)
-    
+
     // 如果是正数，前面加"+"号
     return offset > 0 ? `+${formattedOffset}` : formattedOffset
   } catch (error) {
@@ -246,10 +336,41 @@ const calculateOffset = (receiveFreq: string, transmitFreq: string): string => {
   }
 }
 
+// 恢复至定位城市
+const restoreToLocatedCity = async () => {
+  // 如果定位服务未启用，不执行任何操作
+  if (!enabled.value) {
+    return
+  }
+
+  // 如果没有定位文本或正在定位中，不执行任何操作
+  if (!locationText.value || locationText.value === '定位中…') {
+    return
+  }
+
+  // 解析定位文本获取城市名称
+  const locatedCity = parseLocationText(locationText.value)
+  
+  // 如果定位城市与当前显示城市相同，不需要操作
+  if (locatedCity === locationCity.value) {
+    return
+  }
+
+  // 更新当前城市
+  locationCity.value = locatedCity
+  // 保存到缓存
+  saveCityToCache(locatedCity)
+  
+  // 加载对应城市的中继台数据
+  await loadRelayDataForCity(locatedCity)
+}
+
 // 重载数据
 const reloadRelayData = async () => {
   try {
     allRelayData.value = await reloadData()
+    // 更新城市列表
+    allCities.value = extractCitiesFromRelayData(allRelayData.value)
 
     // 重新筛选当前城市的数据
     if (locationCity.value && locationCity.value !== '***') {
@@ -277,10 +398,10 @@ const handleLocationUpdate = async (data: { enabled: boolean; text: string }) =>
     // 只有当城市真正发生变化时才更新显示和加载数据
     if (newCity !== locationCity.value) {
       locationCity.value = newCity
-      
+
       // 强制重新渲染组件
       renderKey.value += 1
-      
+
       // 加载对应城市的中继台数据
       await loadRelayDataForCity(newCity)
     }
@@ -306,6 +427,11 @@ watch([enabled, locationText], ([isEnabled, text]) => {
 onMounted(async () => {
   console.log('中继页面加载，当前定位状态:', enabled.value, locationText.value)
 
+  // 加载所有中继数据
+  allRelayData.value = await reloadData()
+  // 提取所有城市列表
+  allCities.value = extractCitiesFromRelayData(allRelayData.value)
+
   const cachedCity = getCachedCity()
   if (cachedCity !== '***') {
     locationCity.value = cachedCity
@@ -322,8 +448,6 @@ onMounted(async () => {
     locationCity.value = newCity
     await loadRelayDataForCity(newCity)
   }
-
-  await reloadData();
 })
 
 // 组件卸载时移除事件监听
