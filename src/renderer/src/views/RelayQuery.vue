@@ -36,9 +36,9 @@
           </div>
           <div class="relayFreq">
             <div class="frep_item">
-              <p>接收 <span>{{ relay.receiveFreq }}</span></p>
+              <p>接收 <span>{{ formatFrequency(relay.receiveFreq) }}</span></p>
               <p>/</p>
-              <p>发射 <span>{{ relay.transmitFreq }}</span></p>
+              <p>发射 <span>{{ formatFrequency(relay.transmitFreq) }}</span></p>
             </div>
             <div class="frep_item">
               <p>差频 <span>{{ calculateOffset(relay.receiveFreq, relay.transmitFreq) }}</span></p>
@@ -97,7 +97,6 @@ const theme = useTheme()
 const { enabled, locationText } = useLocation()
 const {
   loading,
-  error,
   lastUpdateDate,
   loadRelayData,
   filterRelayByCity,
@@ -176,6 +175,7 @@ const getIconPath = (iconName: string) => {
 
 // 加载中继台数据
 const loadRelayDataForCity = async (city: string) => {
+  // 如果城市为空或为***，清空当前城市数据
   if (!city || city === '***') {
     currentCityRelays.value = []
     return
@@ -199,6 +199,27 @@ const loadRelayDataForCity = async (city: string) => {
   }
 }
 
+// 格式化频率显示，确保小数位为4位，不足则补0
+const formatFrequency = (freq: string): string => {
+  try {
+    // 如果已经是4位小数，直接返回
+    if (freq.includes('.') && freq.split('.')[1].length === 4) {
+      return freq
+    }
+    
+    // 转换为数字再格式化为4位小数
+    const num = parseFloat(freq)
+    if (isNaN(num)) {
+      return freq
+    }
+    
+    return num.toFixed(4)
+  } catch (error) {
+    console.error('格式化频率失败:', error)
+    return freq
+  }
+}
+
 // 计算差频：发射频率 - 接收频率
 const calculateOffset = (receiveFreq: string, transmitFreq: string): string => {
   try {
@@ -215,7 +236,10 @@ const calculateOffset = (receiveFreq: string, transmitFreq: string): string => {
     const offset = transmit - receive
 
     // 格式化输出，保留3位小数
-    return offset.toFixed(3)
+    const formattedOffset = offset.toFixed(3)
+    
+    // 如果是正数，前面加"+"号
+    return offset > 0 ? `+${formattedOffset}` : formattedOffset
   } catch (error) {
     console.error('计算差频失败:', error)
     return '0.000'
@@ -241,9 +265,6 @@ const reloadRelayData = async () => {
 const handleLocationUpdate = async (data: { enabled: boolean; text: string }) => {
   console.log('定位服务状态更新:', data)
 
-  // 强制重新渲染组件
-  renderKey.value += 1
-
   if (data.enabled && data.text && data.text !== '定位中…') {
     const newCity = parseLocationText(data.text)
     const cachedCity = getCachedCity()
@@ -253,15 +274,24 @@ const handleLocationUpdate = async (data: { enabled: boolean; text: string }) =>
       saveCityToCache(newCity)
     }
 
-    // 始终更新显示的城市
-    locationCity.value = newCity
-
-    // 加载对应城市的中继台数据
-    await loadRelayDataForCity(newCity)
+    // 只有当城市真正发生变化时才更新显示和加载数据
+    if (newCity !== locationCity.value) {
+      locationCity.value = newCity
+      
+      // 强制重新渲染组件
+      renderKey.value += 1
+      
+      // 加载对应城市的中继台数据
+      await loadRelayDataForCity(newCity)
+    }
   } else if (!data.enabled) {
     // 定位服务关闭时显示***
-    locationCity.value = '***'
-    currentCityRelays.value = []
+    if (locationCity.value !== '***') {
+      locationCity.value = '***'
+      currentCityRelays.value = []
+      // 强制重新渲染组件
+      renderKey.value += 1
+    }
   }
   // 如果是定位中状态，保持当前显示不变
 }
