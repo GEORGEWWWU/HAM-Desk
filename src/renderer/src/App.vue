@@ -207,7 +207,7 @@
               <div class="relay_item_box">
                 <div class="relayCount">
                   <img :src="getIconPath('中继查询')">
-                  <p>数据库中继数量：0</p>
+                  <p>数据库中继数量：{{ relayCount }}</p>
                 </div>
               </div>
             </div>
@@ -258,7 +258,7 @@
 
 <!------------数据交互部分------------>
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { useTheme } from './function/useTheme'
 import { useCallsign } from './function/useCallsign'
 import { useLocation } from './function/useLocation'
@@ -267,11 +267,32 @@ import { GITHUB_REPO, PRIVACY_POLICY_FILE, DISCLAIMER_FILE, OFFICIAL_WEBSITE } f
 import { useLog } from './function/useLog'
 import { useVersion } from './function/useVersion'
 import { exportDataToZip } from './function/exportUtils'
+import { useRelayData } from './function/useRelayData'
 const { version } = useVersion()
 const { logDir } = useLog()
 const { checking, hasNew, newVer, checkUpdate } = useUpdate()
 const { toggleTheme, theme, followSystem, toggleFollowSystem } = useTheme()
 const { enabled, locationText, toggleLocation } = useLocation()
+const { loadRelayData } = useRelayData()
+
+// 中继数量
+const relayCount = ref(0)
+
+// 加载中继数据并获取数量
+const loadRelayCount = async () => {
+  try {
+    const data = await loadRelayData()
+    relayCount.value = data.length
+  } catch (error) {
+    console.error('加载中继数据失败:', error)
+    relayCount.value = 0
+  }
+}
+
+// 组件挂载时加载中继数量
+onMounted(() => {
+  loadRelayCount()
+})
 
 // 打开日志目录
 async function openLogDir() {

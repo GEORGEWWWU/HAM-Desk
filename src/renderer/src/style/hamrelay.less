@@ -166,27 +166,13 @@
         z-index: 100;
         animation: searchResultFadeIn 0.2s ease-in-out;
 
-        &::-webkit-scrollbar {
-          display: block !important;
-          width: 5px;
-          height: auto;
-        }
-
-        &::-webkit-scrollbar-track {
-          background: var(--system-item-bg-color);
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background: var(--primary-color-light);
-          border-radius: 5px;
-        }
-
         .result_item {
           width: 100%;
           height: auto;
           display: flex;
           justify-content: center;
           align-items: center;
+          border-radius: 6px;
 
           button {
             width: 100%;
@@ -197,6 +183,7 @@
             background: none;
             padding: 4px 0;
             opacity: 0.8;
+            border-radius: 6px;
             transition: opacity 0.12s ease-in-out;
 
             &:hover {
@@ -247,6 +234,7 @@
       align-content: flex-start;
       gap: 13px;
       padding: 5px;
+      animation: relayListFadeIn 0.3s ease-in-out;
 
       // 中继卡片
       .relayCard {
@@ -369,6 +357,20 @@
           font-size: 14px;
           color: var(--text-color);
         }
+      }
+    }
+
+    @keyframes relayListFadeIn {
+      0% {
+        opacity: 0;
+      }
+
+      20%{
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
       }
     }
   }

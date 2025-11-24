@@ -350,7 +350,7 @@ const restoreToLocatedCity = async () => {
 
   // 解析定位文本获取城市名称
   const locatedCity = parseLocationText(locationText.value)
-  
+
   // 如果定位城市与当前显示城市相同，不需要操作
   if (locatedCity === locationCity.value) {
     return
@@ -360,7 +360,7 @@ const restoreToLocatedCity = async () => {
   locationCity.value = locatedCity
   // 保存到缓存
   saveCityToCache(locatedCity)
-  
+
   // 加载对应城市的中继台数据
   await loadRelayDataForCity(locatedCity)
 }
