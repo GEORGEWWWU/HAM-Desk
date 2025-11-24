@@ -1,12 +1,14 @@
 // function/useHamMapsData.ts
 import { ref } from 'vue'
 
+// HAM地图数据管理
 export function useHamMapsData() {
   const d1 = ref(''), d2 = ref(''), d3 = ref(''), d4 = ref('')
   const n1 = ref(''), n2 = ref(''), n3 = ref(''), n4 = ref('')
   const loading = ref(false)
   const error = ref('')
 
+  // 加载HAM地图数据
   const load = async () => {
     loading.value = true
     error.value = ''
@@ -14,6 +16,7 @@ export function useHamMapsData() {
       const xml: string = await window.electronAPI.getHamRss()
       const doc = new DOMParser().parseFromString(xml, 'text/xml')
 
+      // 解析HAM地图数据
       doc.querySelectorAll('calculatedconditions band').forEach((e: Element) => {
         const name = e.getAttribute('name') || ''
         const time = e.getAttribute('time') || ''

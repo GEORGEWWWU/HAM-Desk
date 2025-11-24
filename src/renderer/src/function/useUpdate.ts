@@ -1,23 +1,27 @@
+// function/useUpdate.ts
+
 import { ref } from 'vue'
 import { GITHUB_REPO } from '../const'
 
+// 更新检查管理
 export function useUpdate() {
   const checking = ref(false)
   const hasNew = ref(false)
   const newVer = ref('')
   let CURRENT = '' // 异步赋值
 
+  // 检查更新
   async function checkUpdate() {
     checking.value = true
     hasNew.value = false
     newVer.value = ''
     try {
-      // ① 先拿本地版本号
+      // 先拿本地版本号
       if (!CURRENT) CURRENT = await window.electronAPI.getAppVersion()
-      
-      // ② 再问 GitHub - 使用正确的API获取最新发行版
+
+      // 再问 GitHub - 使用正确的API获取最新发行版
       const rsp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`)
-      
+
       if (!rsp.ok) {
         if (rsp.status === 404) {
           // 仓库不存在或没有发布版本
@@ -31,9 +35,9 @@ export function useUpdate() {
           throw new Error(`网络错误: ${rsp.status}`)
         }
       }
-      
+
       const release = await rsp.json()
-      
+
       // 检查是否有新版本
       if (release.tag_name && release.tag_name !== `v${CURRENT}`) {
         hasNew.value = true

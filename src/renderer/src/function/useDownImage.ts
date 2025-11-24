@@ -1,10 +1,12 @@
 // function/useDownImage.ts
+
+// 下载地图
 export async function downloadImage(src: string, filename?: string): Promise<void> {
   try {
     // 处理资源文件路径（支持开发和生产环境）
     let fileName: string | null = null
     let isAssetFile = false
-    
+
     // 检查是否为资源文件（支持多种路径格式）
     if (src.startsWith('../assets/')) {
       fileName = src.replace('../assets/', '')
@@ -19,7 +21,7 @@ export async function downloadImage(src: string, filename?: string): Promise<voi
       fileName = src.replace('/assets/', '')
       isAssetFile = true
     }
-    
+
     if (isAssetFile && fileName) {
       // 显示保存对话框
       const result = await window.electronAPI.showSaveDialog({
@@ -32,7 +34,7 @@ export async function downloadImage(src: string, filename?: string): Promise<voi
           { name: 'All Files', extensions: ['*'] }
         ]
       })
-      
+
       if (result.filePath) {
         // 通过主进程直接复制文件
         const copyResult = await window.electronAPI.copyAssetFile(fileName, result.filePath)
@@ -51,10 +53,10 @@ export async function downloadImage(src: string, filename?: string): Promise<voi
       if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.statusText}`)
       }
-      
+
       // 获取图片数据
       const buffer = await response.arrayBuffer()
-      
+
       // 显示保存对话框
       const result = await window.electronAPI.showSaveDialog({
         defaultPath: filename || src.split('/').pop(),
@@ -66,7 +68,7 @@ export async function downloadImage(src: string, filename?: string): Promise<voi
           { name: 'All Files', extensions: ['*'] }
         ]
       })
-      
+
       if (result.filePath) {
         // 保存图片到用户选择的位置
         await window.electronAPI.writeFile(result.filePath, Buffer.from(buffer))

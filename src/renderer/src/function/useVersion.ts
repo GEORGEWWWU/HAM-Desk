@@ -1,6 +1,7 @@
-// src/renderer/src/function/useVersion.ts
+// function/useVersion.ts
 import { ref } from 'vue'
 
+// 版本管理
 export function useVersion() {
   const version = ref('')
 

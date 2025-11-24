@@ -1,12 +1,10 @@
+// function/exportUtils.ts
+
 import Papa from 'papaparse'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
-/**
- * 将JSON数据转换为CSV格式
- * @param jsonData JSON数据
- * @returns CSV字符串
- */
+// 将JSON数据转换为CSV格式
 export function jsonToCsv(jsonData: any): string {
   if (!jsonData || typeof jsonData !== 'object') {
     return ''
@@ -18,7 +16,7 @@ export function jsonToCsv(jsonData: any): string {
   }
 
   // 如果是对象，尝试获取数组字段
-  const arrayFields = Object.keys(jsonData).filter(key => 
+  const arrayFields = Object.keys(jsonData).filter(key =>
     Array.isArray(jsonData[key])
   )
 
@@ -32,12 +30,7 @@ export function jsonToCsv(jsonData: any): string {
   return Papa.unparse([jsonData])
 }
 
-/**
- * 将复杂JSON数据扁平化为适合CSV的格式
- * @param data JSON数据
- * @param parentKey 父级键名
- * @returns 扁平化后的对象
- */
+// 将复杂JSON数据扁平化为适合CSV的格式
 function flattenJson(data: any, parentKey = ''): Record<string, any> {
   if (!data || typeof data !== 'object') {
     return { [parentKey]: data }
@@ -45,6 +38,7 @@ function flattenJson(data: any, parentKey = ''): Record<string, any> {
 
   const result: Record<string, any> = {}
 
+  // 遍历对象的每个属性
   for (const key in data) {
     const newKey = parentKey ? `${parentKey}.${key}` : key
 
@@ -72,11 +66,7 @@ function flattenJson(data: any, parentKey = ''): Record<string, any> {
   return result
 }
 
-/**
- * 将复杂JSON数据转换为CSV格式
- * @param jsonData JSON数据
- * @returns CSV字符串
- */
+// 将复杂JSON数据转换为CSV格式
 export function complexJsonToCsv(jsonData: any): string {
   if (!jsonData || typeof jsonData !== 'object') {
     return ''
@@ -89,7 +79,7 @@ export function complexJsonToCsv(jsonData: any): string {
   }
 
   // 如果是对象，尝试获取数组字段
-  const arrayFields = Object.keys(jsonData).filter(key => 
+  const arrayFields = Object.keys(jsonData).filter(key =>
     Array.isArray(jsonData[key])
   )
 
@@ -97,7 +87,7 @@ export function complexJsonToCsv(jsonData: any): string {
   if (arrayFields.length > 0) {
     const firstArrayField = arrayFields[0]
     const arrayData = jsonData[firstArrayField]
-    const flattenedData = Array.isArray(arrayData) 
+    const flattenedData = Array.isArray(arrayData)
       ? arrayData.map(item => flattenJson(item))
       : [flattenJson(arrayData)]
     return Papa.unparse(flattenedData)
@@ -144,10 +134,7 @@ export async function exportDataToZip(jsonData: Record<string, any>, zipFileName
   }
 }
 
-/**
- * 获取当前日期时间字符串，用于文件命名
- * @returns 格式化的日期时间字符串
- */
+// 获取当前日期时间字符串，用于文件命名
 export function getCurrentTimestamp(): string {
   const now = new Date()
   return now.toISOString().replace(/[:.]/g, '-').slice(0, 19)

@@ -57,23 +57,25 @@ const initLocation = () => {
 // 初始化一次
 initLocation()
 
+// 位置服务管理
 export function useLocation() {
   const toggleLocation = async (on: boolean) => {
-    const previousState = enabled.value
+
+    // 切换定位服务状态
     enabled.value = on
     localStorage.setItem('ham_location_enabled', String(on))
-    
+
     if (!on) {
       locationText.value = '未启用位置服务'
       // 发出定位服务关闭事件
       emit('location-updated', { enabled: false, text: locationText.value })
       return
     }
-    
+
     locationText.value = '定位中…'
     // 发出定位开始事件
     emit('location-updated', { enabled: true, text: locationText.value })
-    
+
     const txt = await ipLocate()
     locationText.value = txt
     localStorage.setItem(STORAGE_KEY, txt)

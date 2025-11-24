@@ -1,4 +1,5 @@
 // src/renderer/src/function/useTheme.ts
+
 /// <reference types="../env.d.ts" />
 import { ref, watchEffect } from 'vue'
 

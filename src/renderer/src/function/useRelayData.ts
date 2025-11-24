@@ -111,11 +111,10 @@ export const useRelayData = () => {
     return data.filter(item => {
       if (!item.city) return false
 
-      // 多种匹配方式：
-      // 1. 直接包含城市名
+      // 直接包含城市名
       if (item.city.includes(city)) return true
 
-      // 2. 如果城市字段包含逗号，检查城市部分
+      // 如果城市字段包含逗号，检查城市部分
       if (item.city.includes(',')) {
         const parts = item.city.split(',')
         if (parts.length >= 2) {
@@ -124,7 +123,7 @@ export const useRelayData = () => {
         }
       }
 
-      // 3. 不区分大小写匹配
+      // 不区分大小写匹配
       if (item.city.toLowerCase().includes(city.toLowerCase())) return true
 
       return false
@@ -133,7 +132,6 @@ export const useRelayData = () => {
 
   // 手动重载数据
   const reloadData = async (): Promise<ParsedRelayData[]> => {
-    // 直接重新加载数据，无需清除缓存
     return await loadRelayData()
   }
 

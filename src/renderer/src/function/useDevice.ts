@@ -2,12 +2,14 @@
 
 import { ref, nextTick } from 'vue'
 
+// 设备信息接口
 export interface Device {
   id: number
   deviceName: string
   deviceType: string
 }
 
+// 设备数据接口
 export interface DeviceData {
   deviceList: Device[]
 }
@@ -35,8 +37,10 @@ class DeviceEventBus {
   }
 }
 
+// 设备事件总线实例
 export const deviceEventBus = new DeviceEventBus()
 
+// 设备管理
 export function useDevice() {
   const devices = ref<Device[]>([])
   const isLoading = ref(false)
