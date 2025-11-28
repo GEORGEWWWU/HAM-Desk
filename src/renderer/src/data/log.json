@@ -1,23 +1,7 @@
 {
-  "logs": [
-    {
-      "id": "micja87gut9w7itsnc",
-      "datetime": "2025-11-24 10:34",
-      "call": "BA8AYY",
-      "freq": "420.000",
-      "mode": "FM",
-      "rstS": "59",
-      "rstR": "59",
-      "power": "5",
-      "qth": "123",
-      "message": "123",
-      "qsl": "已发送/已接收",
-      "qslSentDate": "2025-11-24",
-      "qslReceivedDate": "2025-11-24"
-    }
-  ],
+  "logs": [],
   "statistics": {
-    "totalContacts": 1,
-    "lastContact": "2025-11-24 10:34"
+    "totalContacts": 0,
+    "lastContact": ""
   }
 }

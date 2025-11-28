@@ -904,7 +904,7 @@ ipcMain.handle('read-relay-excel', async () => {
     // 确定Excel文件路径
     const excelFilePath = isDev
       ? join(app.getAppPath(), 'src', 'renderer', 'src', 'data', '全国UV段模拟中继（BD8FTD维护）.xlsx')
-      : join(app.getAppPath(), 'data', '全国UV段模拟中继（BD8FTD维护）.xlsx')
+      : join(process.resourcesPath, 'data', '全国UV段模拟中继（BD8FTD维护）.xlsx')
 
     // 检查文件是否存在
     try {

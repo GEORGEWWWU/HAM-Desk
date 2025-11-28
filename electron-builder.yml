@@ -18,6 +18,10 @@ extraResources:
     to: assets
     filter:
       - "**/*"
+  - from: src/renderer/src/data
+    to: data
+    filter:
+      - "**/*"
 win:
   executableName: HAMDesk
   requestedExecutionLevel: asInvoker

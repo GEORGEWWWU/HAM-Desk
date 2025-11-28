@@ -3,8 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme } from '../function/useTheme'
-const theme = useTheme()
+// import { useTheme } from '../function/useTheme'
+// const theme = useTheme()
 </script>
 
 <style scoped lang="less">

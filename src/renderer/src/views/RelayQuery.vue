@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useTheme } from '../function/useTheme'
 import { useLocation, on, off } from '../function/useLocation'
 import { useRelayData, type ParsedRelayData } from '../function/useRelayData'
