@@ -183,6 +183,9 @@ function createWindow(): void {
     mainWindow.show()
     sendTheme(mainWindow) //启动推送主题
     nativeTheme.on('updated', () => sendTheme(mainWindow)) //变化更新推送主题
+    
+    // 应用启动时发送自动检查更新消息
+    mainWindow.webContents.send('app:startup')
   })
 
   // 添加页面加载失败处理

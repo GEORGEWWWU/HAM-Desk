@@ -281,13 +281,20 @@ const loadRelayDataForCity = async (city: string) => {
     const filteredData = filterRelayByCity(allRelayData.value, city)
     currentCityRelays.value = filteredData
 
-    console.log(`为城市 ${city} 找到 ${filteredData.length} 个中继台`)
+    // 只有当城市真正发生变化时才输出日志
+    if (city !== lastCity.value) {
+      console.log(`为城市 ${city} 找到 ${filteredData.length} 个中继台`)
+      lastCity.value = city
+    }
 
   } catch (err) {
     console.error('加载中继数据失败:', err)
     currentCityRelays.value = []
   }
 }
+
+// 保存上一次的城市，用于避免重复输出日志
+const lastCity = ref('')
 
 // 格式化频率显示，确保小数位为4位，不足则补0
 const formatFrequency = (freq: string): string => {
@@ -384,8 +391,6 @@ const reloadRelayData = async () => {
 
 // 处理定位服务状态变化
 const handleLocationUpdate = async (data: { enabled: boolean; text: string }) => {
-  console.log('定位服务状态更新:', data)
-
   if (data.enabled && data.text && data.text !== '定位中…') {
     const newCity = parseLocationText(data.text)
     const cachedCity = getCachedCity()
@@ -419,14 +424,11 @@ const handleLocationUpdate = async (data: { enabled: boolean; text: string }) =>
 
 // 监听定位服务状态和定位文本变化
 watch([enabled, locationText], ([isEnabled, text]) => {
-  console.log('监听到定位状态变化:', isEnabled, text)
   handleLocationUpdate({ enabled: isEnabled, text: text || '未启用位置服务' })
 }, { immediate: true })
 
 // 页面加载时，先从缓存获取城市
 onMounted(async () => {
-  console.log('中继页面加载，当前定位状态:', enabled.value, locationText.value)
-
   // 加载所有中继数据
   allRelayData.value = await reloadData()
   // 提取所有城市列表

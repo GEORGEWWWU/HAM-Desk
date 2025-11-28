@@ -52,6 +52,8 @@ declare global {
       // 导出中继数据为Excel文件
       getAppPath: () => Promise<string>
       readRelayExcel: (fileName: string) => Promise<{ success: boolean; data?: any[]; error?: string }>
+      // 应用启动事件监听
+      onAppStartup: (callback: () => void) => void
     }
   }
 }

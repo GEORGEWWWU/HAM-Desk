@@ -11,7 +11,6 @@
           <button @click="$router.push('/')"><img :src="getIconPath('HAM')"></button>
           <button @click="$router.push('/log')"><img :src="getIconPath('通联日志')"></button>
           <button @click="$router.push('/relay')"><img :src="getIconPath('中继查询')"></button>
-          <button @click="$router.push('/exam')"><img :src="getIconPath('HAM考试')"></button>
         </div>
         <div class="aside_settings">
           <button @click="toggleSettings()">
@@ -156,7 +155,7 @@
                 </div>
                 <div class="update_button">
                   <label class="toggle-switch">
-                    <input type="checkbox" disabled />
+                    <input type="checkbox" :checked="autoCheckUpdate" @change="handleAutoCheckUpdateChange" />
                     <div class="toggle-switch-background">
                       <div class="toggle-switch-handle"></div>
                     </div>
@@ -292,6 +291,13 @@ const loadRelayCount = async () => {
 // 组件挂载时加载中继数量
 onMounted(() => {
   loadRelayCount()
+
+  // 监听应用启动事件，执行自动检查更新
+  window.electronAPI.onAppStartup(async () => {
+    if (autoCheckUpdate.value) {
+      await checkUpdate(true)
+    }
+  })
 })
 
 // 打开日志目录
@@ -343,7 +349,7 @@ async function handleCheckUpdate() {
     console.error('检查更新失败:', error)
     // 根据错误类型显示不同的提示
     const errorMessage = error instanceof Error ? error.message : '未知错误'
-    
+
     if (errorMessage.includes('仓库不存在') || errorMessage.includes('404')) {
       alert('未找到GitHub仓库或发布版本，请检查仓库地址是否正确。')
     } else if (errorMessage.includes('API访问受限') || errorMessage.includes('403')) {
@@ -369,6 +375,13 @@ const { userCallSign, saveCallsign } = useCallsign()
 const isEditing = ref(false)
 const editText = ref('')
 const inputEl = ref<HTMLInputElement>()
+
+// 启动自动检查更新
+const autoCheckUpdate = ref(localStorage.getItem('autoCheckUpdate') === 'true')
+const handleAutoCheckUpdateChange = (e: Event) => {
+  autoCheckUpdate.value = (e.target as HTMLInputElement).checked
+  localStorage.setItem('autoCheckUpdate', String(autoCheckUpdate.value))
+}
 async function handleEditClick() {
   if (!isEditing.value) {
     // 进入编辑

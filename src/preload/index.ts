@@ -61,7 +61,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 获取应用路径
   getAppPath: () => ipcRenderer.invoke('get-app-path'),
   // 读取中继台Excel数据
-  readRelayExcel: () => ipcRenderer.invoke('read-relay-excel')
+  readRelayExcel: () => ipcRenderer.invoke('read-relay-excel'),
+  // 应用启动事件监听
+  onAppStartup: (callback: () => void) => {
+    ipcRenderer.on('app:startup', callback)
+  }
 })
 
 // 监听系统主题变化事件
