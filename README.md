@@ -6,6 +6,10 @@
 
 HAM Desk 是一款基于 Vue 3 + Electron 开发的业余无线电（HAM）工具应用，为无线电爱好者提供便捷的呼号管理、通联日志、中继查询和地图等功能。
 
+
+![HAM Desk 应用截图](https://github.com/GEORGEWWWU/HAM-Desk/blob/main/resources/readme_app.png)
+
+
 ## 功能特性
 
 ### 📋 呼号管理
